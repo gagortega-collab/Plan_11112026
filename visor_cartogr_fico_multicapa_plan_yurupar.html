@@ -1,0 +1,2999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Visor Geográfico Multicapa - Plan Yuruparí</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <style>
+    :root {
+      --glass-bg: linear-gradient(145deg, rgba(24, 30, 46, 0.62) 0%, rgba(12, 16, 28, 0.54) 100%);
+      --glass-card-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.03) 100%);
+      --glass-border: rgba(255, 255, 255, 0.22);
+      --glass-highlight: rgba(255, 255, 255, 0.36);
+    }
+
+    html, body, #map {
+      height: 100%;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Superficie principal Liquid Glass (iOS / iPadOS) */
+    .liquid-glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px) saturate(195%);
+      -webkit-backdrop-filter: blur(28px) saturate(195%);
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 28px 60px -12px rgba(0, 0, 0, 0.72),
+        inset 0 1px 0.5px var(--glass-highlight),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    /* Tarjetas internas de cristal esmerilado */
+    .liquid-card {
+      background: var(--glass-card-bg);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      box-shadow:
+        0 8px 24px -6px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.24);
+      transition: border-color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+    }
+    .liquid-card:hover {
+      border-color: rgba(255, 255, 255, 0.28);
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.045) 100%);
+    }
+
+    /* Sub-contenedores y cajas de métricas en cristal oscuro */
+    .liquid-inset {
+      background: rgba(8, 12, 22, 0.42);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 14px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Segmented Controls estilo iOS */
+    .liquid-segmented {
+      background: rgba(6, 10, 18, 0.46);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 13px;
+      padding: 3px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+    }
+    .seg-active-pill {
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+      border-radius: 10px;
+    }
+
+    /* Cápsulas flotantes tipo Dynamic Island */
+    .liquid-pill {
+      background: linear-gradient(145deg, rgba(22, 28, 44, 0.68) 0%, rgba(12, 16, 26, 0.58) 100%);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow:
+        0 12px 30px -6px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    /* Botones interactivos de cristal */
+    .liquid-btn {
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .liquid-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.32);
+    }
+    .liquid-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Interruptor nativo estilo iOS */
+    .ios-switch-track {
+      background: rgba(120, 128, 148, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+      transition: background-color 0.28s ease, border-color 0.28s ease;
+    }
+    .ios-switch-track::after {
+      box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Popups de Leaflet en Liquid Glass */
+    .leaflet-popup-content-wrapper {
+      background: linear-gradient(155deg, rgba(20, 26, 40, 0.84) 0%, rgba(10, 14, 24, 0.78) 100%) !important;
+      backdrop-filter: blur(26px) saturate(195%) !important;
+      -webkit-backdrop-filter: blur(26px) saturate(195%) !important;
+      color: #f8fafc !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      border-radius: 22px !important;
+      box-shadow:
+        0 22px 48px rgba(0, 0, 0, 0.68),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32) !important;
+    }
+    .leaflet-popup-content {
+      width: min(290px, 76vw) !important;
+      margin: 12px 14px !important;
+    }
+    .leaflet-popup-tip {
+      background: rgba(16, 22, 35, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+    .leaflet-popup-close-button {
+      color: rgba(255, 255, 255, 0.7) !important;
+      top: 8px !important;
+      right: 10px !important;
+      font-size: 18px !important;
+    }
+    .leaflet-popup-close-button:hover {
+      color: #ffffff !important;
+    }
+
+    /* Controles de Zoom Leaflet estilo Liquid Glass */
+    .leaflet-control-zoom {
+      border: none !important;
+      box-shadow: none !important;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .leaflet-control-zoom a {
+      width: 38px !important;
+      height: 38px !important;
+      line-height: 36px !important;
+      border-radius: 14px !important;
+      background: linear-gradient(145deg, rgba(24, 30, 46, 0.68) 0%, rgba(12, 16, 28, 0.58) 100%) !important;
+      backdrop-filter: blur(22px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(190%) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      font-weight: 500 !important;
+      font-size: 18px !important;
+      transition: transform 0.15s ease, background 0.2s ease !important;
+    }
+    .leaflet-control-zoom a:hover {
+      background: rgba(255, 255, 255, 0.22) !important;
+    }
+    .leaflet-control-zoom a:active {
+      transform: scale(0.94);
+    }
+
+    .leaflet-control-attribution {
+      background: rgba(12, 16, 26, 0.55) !important;
+      backdrop-filter: blur(12px) !important;
+      color: rgba(226, 232, 240, 0.7) !important;
+      border-top-left-radius: 10px !important;
+      padding: 2px 8px !important;
+      font-size: 10px !important;
+    }
+    .leaflet-control-attribution a {
+      color: #7dd3fc !important;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    .pulse-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: rgba(239, 68, 68, 0.28);
+      border: 2px solid #ef4444;
+      animation: pulseRing 2.2s infinite;
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ffffff;
+    }
+
+    .distance-label {
+      background: rgba(15, 23, 42, 0.78) !important;
+      backdrop-filter: blur(12px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      color: #f8fafc !important;
+      border-radius: 9999px !important;
+      padding: 2px 8px !important;
+      font-size: 10.5px !important;
+      font-weight: 600 !important;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+      text-align: center;
+    }
+    .distance-label::before {
+      display: none !important;
+    }
+
+    @media (max-width: 767px) {
+      .distance-label {
+        font-size: 9.5px !important;
+        padding: 1.5px 6px !important;
+      }
+      .leaflet-top.leaflet-right {
+        top: 66px;
+      }
+    }
+
+    /* Ocultar scrollbar horizontal en la Isla Superior manteniendo deslizamiento táctil */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Píldoras de capa en la Dynamic Island */
+    .island-layer-chip {
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      white-space: nowrap;
+    }
+    .island-layer-chip:active {
+      transform: scale(0.95);
+    }
+
+    button, label {
+      touch-action: manipulation;
+    }
+
+    /* Scrollbar sutil estilo iOS */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.36);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 overflow-hidden select-none sm:select-auto">
+
+  <div class="relative h-screen h-[100dvh] w-screen overflow-hidden">
+    <!-- Backdrop táctil en móvil con desenfoque suave -->
+    <div id="sidebarBackdrop" onclick="closeSidebar()" class="fixed inset-0 bg-slate-950/45 backdrop-blur-[4px] z-[1050] hidden md:hidden transition-opacity"></div>
+
+    <!-- Panel Flotante Liquid Glass (iPadOS / iOS Sheet) -->
+    <aside id="sidebar" class="fixed top-2.5 bottom-2.5 left-2.5 sm:top-3.5 sm:bottom-3.5 sm:left-3.5 w-[88vw] max-w-[372px] rounded-[28px] liquid-glass-panel z-[1100] flex flex-col overflow-hidden transform -translate-x-[112%] md:translate-x-0 transition-transform duration-300 ease-out">
+      
+      <!-- Grabber pill superior (estética hoja iOS) -->
+      <div class="pt-2 pb-0.5 flex justify-center shrink-0">
+        <div class="w-10 h-1 rounded-full bg-white/30"></div>
+      </div>
+
+      <!-- Header -->
+      <div class="px-4 pt-1.5 pb-3.5 border-b border-white/15 bg-gradient-to-b from-white/[0.08] to-transparent relative shrink-0">
+        <!-- Botón circular cerrar en cristal -->
+        <button onclick="closeSidebar()" title="Ocultar panel de capas" aria-label="Ocultar panel de capas" class="absolute top-2 right-3 w-8 h-8 flex items-center justify-center rounded-full liquid-btn text-white/80 hover:text-white text-xs font-bold">
+          ✕
+        </button>
+
+        <!-- Logo Placa Metálica Plan Yuruparí engastada en cristal -->
+        <div class="flex justify-center mb-2.5 pr-6 md:pr-0">
+          <div class="w-40 sm:w-44 rounded-2xl p-1.5 bg-gradient-to-b from-amber-300/20 via-white/10 to-black/30 border border-white/25 shadow-[0_10px_25px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.4)]">
+            <svg viewBox="0 0 360 250" class="w-full h-auto block rounded-xl" role="img" aria-label="Placa metálica Plan Yuruparí">
+              <defs>
+                <linearGradient id="brassSurface" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#c9a554" />
+                  <stop offset="22%" stop-color="#f3df98" />
+                  <stop offset="45%" stop-color="#be9642" />
+                  <stop offset="68%" stop-color="#ebd284" />
+                  <stop offset="88%" stop-color="#9e792c" />
+                  <stop offset="100%" stop-color="#d4b160" />
+                </linearGradient>
+
+                <linearGradient id="brassSheen" x1="0%" y1="15%" x2="100%" y2="85%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28" />
+                  <stop offset="35%" stop-color="#ffffff" stop-opacity="0.04" />
+                  <stop offset="60%" stop-color="#000000" stop-opacity="0.14" />
+                  <stop offset="100%" stop-color="#fff4c2" stop-opacity="0.20" />
+                </linearGradient>
+
+                <pattern id="brushedGrain" width="120" height="4" patternUnits="userSpaceOnUse">
+                  <line x1="0" y1="1" x2="120" y2="1" stroke="#fff7d6" stroke-width="0.6" stroke-opacity="0.18" />
+                  <line x1="0" y1="3" x2="120" y2="3" stroke="#4d370c" stroke-width="0.6" stroke-opacity="0.16" />
+                </pattern>
+
+                <linearGradient id="letterFace" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fff2bd" />
+                  <stop offset="38%" stop-color="#dfc06f" />
+                  <stop offset="75%" stop-color="#a88130" />
+                  <stop offset="100%" stop-color="#cfa952" />
+                </linearGradient>
+
+                <radialGradient id="screwDome" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#fff3c4" />
+                  <stop offset="50%" stop-color="#cca54e" />
+                  <stop offset="85%" stop-color="#7c5b1b" />
+                  <stop offset="100%" stop-color="#47320a" />
+                </radialGradient>
+
+                <filter id="plaqueShadow" x="-5%" y="-5%" width="110%" height="115%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.65" />
+                </filter>
+              </defs>
+
+              <rect x="4" y="4" width="352" height="242" rx="22" ry="22" fill="url(#brassSurface)" stroke="#5c4212" stroke-width="3" filter="url(#plaqueShadow)" />
+              <rect x="6" y="6" width="348" height="238" rx="20" ry="20" fill="url(#brassSheen)" />
+              <rect x="6" y="6" width="348" height="238" rx="20" ry="20" fill="url(#brushedGrain)" />
+              <rect x="8" y="8" width="344" height="234" rx="18" ry="18" fill="none" stroke="#fff3c4" stroke-opacity="0.55" stroke-width="1.4" />
+
+              <path d="M 60 18 L 300 18 A 42 42 0 0 0 342 60 L 342 190 A 42 42 0 0 0 300 232 L 60 232 A 42 42 0 0 0 18 190 L 18 60 A 42 42 0 0 0 60 18 Z"
+                    fill="none" stroke="#fff3c4" stroke-opacity="0.5" stroke-width="2" transform="translate(1,1)" />
+              <path d="M 60 18 L 300 18 A 42 42 0 0 0 342 60 L 342 190 A 42 42 0 0 0 300 232 L 60 232 A 42 42 0 0 0 18 190 L 18 60 A 42 42 0 0 0 60 18 Z"
+                    fill="none" stroke="#4f370c" stroke-width="2.4" />
+
+              <g transform="translate(34, 34)">
+                <circle cx="1" cy="2" r="14.5" fill="#3b2807" opacity="0.65" />
+                <circle cx="0" cy="0" r="14" fill="url(#screwDome)" stroke="#4a330a" stroke-width="1.3" />
+                <g transform="rotate(38)">
+                  <rect x="-12" y="-1.8" width="24" height="3.6" rx="1" fill="#3a2606" />
+                  <line x1="-11" y1="2.2" x2="11" y2="2.2" stroke="#fff0b8" stroke-opacity="0.65" stroke-width="1" />
+                </g>
+              </g>
+
+              <g transform="translate(326, 34)">
+                <circle cx="1" cy="2" r="14.5" fill="#3b2807" opacity="0.65" />
+                <circle cx="0" cy="0" r="14" fill="url(#screwDome)" stroke="#4a330a" stroke-width="1.3" />
+                <g transform="rotate(-42)">
+                  <rect x="-12" y="-1.8" width="24" height="3.6" rx="1" fill="#3a2606" />
+                  <line x1="-11" y1="2.2" x2="11" y2="2.2" stroke="#fff0b8" stroke-opacity="0.65" stroke-width="1" />
+                </g>
+              </g>
+
+              <g transform="translate(34, 216)">
+                <circle cx="1" cy="2" r="14.5" fill="#3b2807" opacity="0.65" />
+                <circle cx="0" cy="0" r="14" fill="url(#screwDome)" stroke="#4a330a" stroke-width="1.3" />
+                <g transform="rotate(-35)">
+                  <rect x="-12" y="-1.8" width="24" height="3.6" rx="1" fill="#3a2606" />
+                  <line x1="-11" y1="2.2" x2="11" y2="2.2" stroke="#fff0b8" stroke-opacity="0.65" stroke-width="1" />
+                </g>
+              </g>
+
+              <g transform="translate(326, 216)">
+                <circle cx="1" cy="2" r="14.5" fill="#3b2807" opacity="0.65" />
+                <circle cx="0" cy="0" r="14" fill="url(#screwDome)" stroke="#4a330a" stroke-width="1.3" />
+                <g transform="rotate(-40)">
+                  <rect x="-12" y="-1.8" width="24" height="3.6" rx="1" fill="#3a2606" />
+                  <line x1="-11" y1="2.2" x2="11" y2="2.2" stroke="#fff0b8" stroke-opacity="0.65" stroke-width="1" />
+                </g>
+              </g>
+
+              <g font-family="Impact, 'Arial Narrow', 'Segoe UI', sans-serif" font-weight="900" text-anchor="middle">
+                <text x="182.5" y="114.5" font-size="64" letter-spacing="3" fill="#3b2706" opacity="0.85">PLAN</text>
+                <text x="179" y="111" font-size="64" letter-spacing="3" fill="#fff5cc">PLAN</text>
+                <text x="180" y="112" font-size="64" letter-spacing="3" fill="url(#letterFace)" stroke="#5c400e" stroke-width="1.2">PLAN</text>
+
+                <text x="182.5" y="182.5" font-size="62" letter-spacing="2" fill="#3b2706" opacity="0.85">YURUPARÍ</text>
+                <text x="179" y="179" font-size="62" letter-spacing="2" fill="#fff5cc">YURUPARÍ</text>
+                <text x="180" y="180" font-size="62" letter-spacing="2" fill="url(#letterFace)" stroke="#5c400e" stroke-width="1.2">YURUPARÍ</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="min-w-0">
+            <span class="text-[10px] font-semibold tracking-wider uppercase text-amber-200 bg-amber-400/15 border border-amber-300/30 px-2.5 py-0.5 rounded-full">
+              Análisis Geoespacial
+            </span>
+            <h1 class="text-base sm:text-lg font-bold text-white mt-1 tracking-tight truncate">Plan Yuruparí — Capas GIS</h1>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="fitAllBases(); closeSidebarOnMobile();" title="Centrar en las 3 poblaciones" class="px-3 py-1.5 liquid-btn text-white rounded-full text-xs font-medium">
+              Centrar
+            </button>
+            <button onclick="resetToLayer1Only(); closeSidebarOnMobile();" title="Desactivar todas las capas excepto las 3 bases" class="px-3 py-1.5 bg-rose-500/25 hover:bg-rose-500/35 text-rose-100 rounded-full border border-rose-300/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.3)] text-xs font-semibold transition active:scale-95">
+              Solo Bases
+            </button>
+          </div>
+        </div>
+        <p class="text-[11px] text-white/65 mt-1">Orinoquía y Amazonía Colombiana • Sistema Multicapa</p>
+      </div>
+
+      <!-- Lista de Capas en Tarjetas Liquid Glass -->
+      <div class="flex-1 overflow-y-auto p-3.5 space-y-3">
+        
+        <!-- CAPA 1 -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-400 shadow-[0_0_10px_#f87171]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 1: Poblaciones Base (3)</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer1" checked class="sr-only peer" onchange="toggleLayer(1)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-red-500/85 peer-checked:border-red-300/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/65 mb-2.5">Nodos estratégicos, pistas OACI y perfil socioeconómico:</p>
+          
+          <div class="space-y-1.5" id="locationsList">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- CAPA 2 -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_10px_#fcd34d]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 2: Red Aeródromos FAC (40 mi)</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer2" checked class="sr-only peer" onchange="toggleLayer(2)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-amber-500/85 peer-checked:border-amber-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Cobertura radial de <strong class="text-amber-300">40 millas</strong> en los 12 aeródromos del mapa FAC:</p>
+
+          <!-- Segmented Control NM vs MI -->
+          <div class="grid grid-cols-2 gap-1 liquid-segmented mb-2">
+            <button id="btnNM" onclick="setMileType('NM')" class="py-1.5 px-2 text-xs font-semibold bg-amber-400 text-slate-950 seg-active-pill transition">
+              40 NM (74,08 km)
+            </button>
+            <button id="btnSM" onclick="setMileType('SM')" class="py-1.5 px-2 rounded-lg text-xs font-medium text-white/65 hover:text-white transition">
+              40 MI (64,37 km)
+            </button>
+          </div>
+
+          <!-- Filtro por Color FAC -->
+          <div class="grid grid-cols-4 gap-1 liquid-segmented mb-2.5">
+            <button id="fac-all" onclick="setFacGroupFilter('all')" class="py-1 px-1 text-[10px] font-semibold bg-white/25 text-white seg-active-pill transition">
+              Todos (12)
+            </button>
+            <button id="fac-red" onclick="setFacGroupFilter('red')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-red-300 hover:bg-red-500/20 transition">
+              ● Rojo (3)
+            </button>
+            <button id="fac-yellow" onclick="setFacGroupFilter('yellow')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-yellow-200 hover:bg-yellow-500/20 transition">
+              ● Amar. (5)
+            </button>
+            <button id="fac-blue" onclick="setFacGroupFilter('blue')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-sky-300 hover:bg-sky-500/20 transition">
+              ● Azul (4)
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1.5 text-white/80">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full border-2 border-red-400 bg-red-500/25 inline-block shrink-0"></span>
+              <span class="text-[10px]"><strong class="text-red-300">Rojo:</strong> SKAC, SKLP, SKBM (Prioritarios Yuruparí)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full border-2 border-yellow-300 bg-yellow-400/25 inline-block shrink-0"></span>
+              <span class="text-[10px]"><strong class="text-yellow-200">Amarillo:</strong> SKUC, SKPD, SKSJ, SKNA, SKMU</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full border-2 border-blue-400 bg-blue-500/25 inline-block shrink-0"></span>
+              <span class="text-[10px]"><strong class="text-blue-300">Azul:</strong> SKYP, SKUA, SKTQ, SKLT (Bases / Extremos)</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 flex justify-between text-[10px]">
+              <span class="text-white/55">Radio / Área anillo:</span>
+              <span class="font-mono text-white"><span id="radiusKmLabel">74.08 km</span> • <span id="areaKmLabel">17,240 km²</span></span>
+            </div>
+            <div class="flex items-center justify-between pt-0.5">
+              <label class="flex items-center gap-1.5 text-white/80 cursor-pointer text-[10px]">
+                <input type="checkbox" id="toggleOaciBadges" checked onchange="renderLayer2()" class="accent-amber-400 rounded">
+                <span>Etiquetas OACI blancas (estilo FAC)</span>
+              </label>
+              <span id="unitLabel" class="hidden">Millas Náuticas (NM)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 3: RED HIDROGRÁFICA ESTRATÉGICA -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-300 shadow-[0_0_10px_#67e8f9]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 3: Red Hidrográfica</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer3" checked class="sr-only peer" onchange="toggleLayer(3)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-cyan-500/85 peer-checked:border-cyan-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Corredores fluviales con trazado meándrico natural de abastecimiento y movilidad:</p>
+
+          <div class="grid grid-cols-3 gap-1 liquid-segmented mb-2.5">
+            <button id="basin-all" onclick="setBasinFilter('all')" class="py-1 px-1.5 text-[11px] font-semibold bg-cyan-400 text-slate-950 seg-active-pill transition">
+              Todos
+            </button>
+            <button id="basin-amazonas" onclick="setBasinFilter('amazonas')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              C. Amazonas
+            </button>
+            <button id="basin-orinoco" onclick="setBasinFilter('orinoco')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              C. Orinoco
+            </button>
+          </div>
+
+          <div class="space-y-1.5 text-[11px] liquid-inset p-2.5">
+            <div class="flex items-center gap-2 text-white/90">
+              <span class="w-4 h-1 rounded-full bg-cyan-300 inline-block shrink-0"></span> Ejes Primarios (Caquetá, Guaviare, Orinoco)
+            </div>
+            <div class="flex items-center gap-2 text-white/75">
+              <span class="w-4 h-0.5 rounded bg-sky-300 inline-block border-b border-dashed border-sky-100 shrink-0"></span> Afluentes Clave (Apaporis, Inírida, Vaupés)
+            </div>
+            <div class="pt-1.5 border-t border-white/10 flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-white/80 cursor-pointer">
+                <input type="checkbox" id="toggleRiverLabels" checked onchange="renderLayer3()" class="accent-cyan-400 rounded">
+                <span>Mostrar nombres de ríos</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 4: PARQUES NACIONALES NATURALES (PNN) -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 4: Parques Nacionales</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer4" checked class="sr-only peer" onchange="toggleLayer(4)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-emerald-500/85 peer-checked:border-emerald-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Áreas protegidas del Sistema de Parques Nacionales (~11,98 M ha):</p>
+
+          <div class="grid grid-cols-2 gap-1 liquid-segmented mb-2.5">
+            <button id="park-all" onclick="setParkFilter('all')" class="py-1 px-1.5 text-[11px] font-semibold bg-emerald-400 text-slate-950 seg-active-pill transition">
+              Todos (10 PNN)
+            </button>
+            <button id="park-priority" onclick="setParkFilter('priority')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Influencia Directa
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1.5">
+            <div class="flex items-center gap-2 text-emerald-200 font-medium">
+              <span class="w-3.5 h-3.5 rounded bg-emerald-400/30 border border-emerald-300 inline-block"></span> Polígono Área Protegida (PNN)
+            </div>
+            <p class="text-[10px] text-white/60 leading-relaxed">
+              Haz clic sobre cualquier parque para ver su extensión, presiones ambientales y cercanía a las bases.
+            </p>
+            <div class="pt-1.5 border-t border-white/10 flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-white/80 cursor-pointer">
+                <input type="checkbox" id="toggleParkLabels" checked onchange="renderLayer4()" class="accent-emerald-400 rounded">
+                <span>Mostrar etiquetas de parques</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 5: DEFORESTACIÓN Y MINERÍA ILEGAL (EIYM) -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-400 shadow-[0_0_10px_#fb7185]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 5: Deforestación y EIYM</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer5" checked class="sr-only peer" onchange="toggleLayer(5)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-rose-500/85 peer-checked:border-rose-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Arcos de deforestación (SMByC-IDEAM) y focos de minería ilícita (oro/coltán):</p>
+
+          <div class="grid grid-cols-3 gap-1 liquid-segmented mb-2.5">
+            <button id="threat-all" onclick="setThreatFilter('all')" class="py-1 px-1.5 text-[11px] font-semibold bg-rose-500 text-white seg-active-pill transition">
+              Todos
+            </button>
+            <button id="threat-deforestation" onclick="setThreatFilter('deforestation')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Deforestación
+            </button>
+            <button id="threat-mining" onclick="setThreatFilter('mining')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Minería EIYM
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1.5">
+            <div class="flex items-center gap-2 text-rose-200 font-medium">
+              <span class="w-3.5 h-3.5 rounded bg-rose-500/35 border border-rose-400 inline-block"></span>
+              <span>Núcleos de Deforestación (85.870 ha reg.)</span>
+            </div>
+            <div class="flex items-center gap-2 text-fuchsia-200 font-medium">
+              <span class="w-3 h-3 rotate-45 bg-fuchsia-500/45 border border-fuchsia-300 inline-block ml-0.5"></span>
+              <span>Focos Minería Ilegal / Dragas (Oro y Coltán)</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 text-[10px] text-white/60 flex justify-between">
+              <span>Top IDEAM: Caquetá (30.414 ha)</span>
+              <span>Meta (22.554 ha)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 6: CULTIVOS ILÍCITOS DE COCA -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-lime-300 shadow-[0_0_10px_#bef264]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 6: Cultivos de Coca</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer6" checked class="sr-only peer" onchange="toggleLayer(6)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-lime-500/85 peer-checked:border-lime-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Enclaves de hoja de coca y consolidado <strong class="text-lime-200">GUDET 2025 vs. SIMCI 2024</strong>:</p>
+
+          <div class="grid grid-cols-3 gap-1 liquid-segmented mb-2.5">
+            <button id="coca-all" onclick="setCocaFilter('all')" class="py-1 px-1.5 text-[11px] font-semibold bg-lime-400 text-slate-950 seg-active-pill transition">
+              Todos
+            </button>
+            <button id="coca-amazonia" onclick="setCocaFilter('amazonia')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Amazonía
+            </button>
+            <button id="coca-orinoquia" onclick="setCocaFilter('orinoquia')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Orinoquía
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-white/60">Total GUDET 2025:</span>
+              <span class="font-mono font-bold text-lime-200">17.024 ha (+19,7%)</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-white/60">Total SIMCI 2024:</span>
+              <span class="font-mono text-white/90">14.219 ha</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 grid grid-cols-2 gap-1 text-[10px] text-white/80">
+              <span>• Caquetá: <strong class="text-white">8.537 ha</strong></span>
+              <span>• Guaviare: <strong class="text-white">5.260 ha</strong></span>
+              <span>• Meta: <strong class="text-white">2.409 ha</strong></span>
+              <span>• Vichada: <strong class="text-white">569 ha</strong></span>
+              <span>• Amazonas: <strong class="text-white">139 ha</strong></span>
+              <span>• Vaupés/Guainía: <strong class="text-white">110 ha</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 7: PUESTOS FLUVIALES AVANZADOS (PFA / ARC) -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-[0_0_10px_#818cf8]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 7: Puestos Fluviales (ARC)</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer7" checked class="sr-only peer" onchange="toggleLayer(7)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-indigo-500/85 peer-checked:border-indigo-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Presencia fluvial permanente (PFA / BFLIM) e infraestructura naval ($88.700 M COP):</p>
+
+          <div class="grid grid-cols-3 gap-1 liquid-segmented mb-2.5">
+            <button id="pfa-all" onclick="setPfaFilter('all')" class="py-1 px-1.5 text-[11px] font-semibold bg-indigo-500 text-white seg-active-pill transition">
+              Todos (15)
+            </button>
+            <button id="pfa-yurupari" onclick="setPfaFilter('yurupari')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Proy. ARC
+            </button>
+            <button id="pfa-frontera" onclick="setPfaFilter('frontera')" class="py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition">
+              Frontera
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1 text-white/80">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded bg-indigo-500 border border-white inline-block"></span>
+              <span class="text-[10px]"><strong>PFA / BFLIM:</strong> Control de corredores fluviales e interdicción</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 flex justify-between text-[10px]">
+              <span class="text-white/60">Inversión ARC Barrancominas:</span>
+              <span class="font-mono text-indigo-200 font-bold">$62.000 M</span>
+            </div>
+            <div class="flex justify-between text-[10px]">
+              <span class="text-white/60">Inversión ARC La Pedrera:</span>
+              <span class="font-mono text-indigo-200 font-bold">$26.700 M</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 8: RED VIAL TERRESTRE (1.206 KM) -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-[0_0_10px_#fb923c]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 8: Red Vial Terrestre</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer8" checked class="sr-only peer" onchange="toggleLayer(8)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-orange-500/85 peer-checked:border-orange-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2">Cubrimiento actual de carreteras (<strong class="text-orange-200">1.206 km</strong>) concentrado en el piedemonte:</p>
+          <div class="liquid-inset p-2.5 text-[10px] space-y-1 text-white/80">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-1 border-b-2 border-dashed border-orange-400 inline-block"></span>
+              <span>Corredores terrestres existentes (Piedemonte / Meta)</span>
+            </div>
+            <p class="text-white/60 pt-1.5 border-t border-white/10 leading-relaxed">
+              Demuestra el <strong class="text-orange-200">100% de aislamiento terrestre</strong> de Araracuara, La Pedrera y Barrancominas.
+            </p>
+          </div>
+        </div>
+
+        <!-- CAPA 9: VIABILIDAD DE AERÓDROMOS REGIONALES -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-teal-300 shadow-[0_0_10px_#5eead4]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 9: Viabilidad Aeródromos</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer9" checked class="sr-only peer" onchange="toggleLayer(9)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-teal-500/85 peer-checked:border-teal-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Estado operacional de pistas complementarias y obras CONPES 4205:</p>
+
+          <div class="grid grid-cols-4 gap-1 liquid-segmented mb-2">
+            <button id="aero-all" onclick="setAeroStatusFilter('all')" class="py-1 px-1 text-[10px] font-semibold bg-teal-400 text-slate-950 seg-active-pill transition">
+              Todos
+            </button>
+            <button id="aero-viable" onclick="setAeroStatusFilter('viable')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-emerald-300 hover:bg-emerald-500/20 transition">
+              Viable
+            </button>
+            <button id="aero-restricted" onclick="setAeroStatusFilter('restricted')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-amber-200 hover:bg-amber-500/20 transition">
+              Restric.
+            </button>
+            <button id="aero-unviable" onclick="setAeroStatusFilter('unviable')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-rose-300 hover:bg-rose-500/20 transition">
+              No Viab.
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[10px] space-y-1 text-white/80">
+            <div><span class="text-emerald-300 font-bold">▲ Viables / CONPES:</span> Araracuara, Barrancominas, Macarena, Inírida, Apiay, Pto. Carreño, etc.</div>
+            <div><span class="text-amber-200 font-bold">▲ Restricción (4):</span> Miraflores, Carurú, Taraira (invierno) y La Uribe (sin pernocta).</div>
+            <div><span class="text-rose-300 font-bold">▲ No Viables (5):</span> Mapiripán (deteriorada), San Felipe, Guérima, Trinidad, Paz de Ariporo.</div>
+          </div>
+        </div>
+
+        <!-- CAPA 10: PRESENCIA DE GAO Y GAO-R -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 10: GAO y GAO-r</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer10" checked class="sr-only peer" onchange="toggleLayer(10)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-purple-500/85 peer-checked:border-purple-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Estructuras armadas ilegales, retaguardia y corredores (<strong class="text-purple-200">1.977 integrantes</strong>):</p>
+
+          <div class="grid grid-cols-4 gap-1 liquid-segmented mb-2.5">
+            <button id="gao-all" onclick="setGaoFilter('all')" class="py-1 px-1 text-[10px] font-semibold bg-purple-500 text-white seg-active-pill transition">
+              Todos
+            </button>
+            <button id="gao-gaor" onclick="setGaoFilter('gaor')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-purple-200 hover:bg-purple-500/20 transition">
+              GAO-r
+            </button>
+            <button id="gao-eln_sm" onclick="setGaoFilter('eln_sm')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-rose-200 hover:bg-rose-500/20 transition">
+              ELN / SM
+            </button>
+            <button id="gao-cdg_dot" onclick="setGaoFilter('cdg_dot')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-amber-200 hover:bg-amber-500/20 transition">
+              CDG / DOT
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-white/60">Región 4 (Amazonía):</span>
+              <span class="font-mono font-bold text-purple-200">1.504 Int. (76,1%)</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-white/60">Región 3 (Orinoquía):</span>
+              <span class="font-mono font-bold text-purple-200">473 Int. (23,9%)</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 space-y-1 text-[10px] text-white/80">
+              <div><span class="text-purple-300 font-bold">⬟ GAO-r (EMC / Calarcá / CNEB):</span> E. Carolina Ramírez, Comandos de Frontera, E. Raúl Reyes, SE. 53 E. Romaña, E. Jhonier Arenas.</div>
+              <div><span class="text-rose-300 font-bold">★ GAO-ELN / SM:</span> Fte. José Daniel Pérez Carrero y E. Acacio Medina.</div>
+              <div><span class="text-amber-200 font-bold">▲ GAO CDG / DOT:</span> Subestructuras Meta y redes transnacionales.</div>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-white/80 cursor-pointer text-[10px]">
+                <input type="checkbox" id="toggleGaoLabels" checked onchange="renderLayer10()" class="accent-purple-400 rounded">
+                <span>Mostrar etiquetas de estructuras</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 11: TELECOMUNICACIONES, RANGO TRUNKING RDM Y ENERGÍA -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-300 shadow-[0_0_10px_#7dd3fc]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 11: Telecom, Trunking y Energía</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer11" checked class="sr-only peer" onchange="toggleLayer(11)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-sky-500/85 peer-checked:border-sky-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Red Troncalizada <strong class="text-sky-200">Motorola GTR8000 ESS</strong>, SD-WAN GEO/LEO, energía ($1.093,6 M) y radioayudas FAC:</p>
+
+          <div class="grid grid-cols-4 gap-1 liquid-segmented mb-2.5">
+            <button id="comms-all" onclick="setCommsFilter('all')" class="py-1 px-1 text-[10px] font-semibold bg-sky-400 text-slate-950 seg-active-pill transition">
+              Todos
+            </button>
+            <button id="comms-trunking" onclick="setCommsFilter('trunking')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-sky-200 hover:bg-sky-500/20 transition">
+              Trunking
+            </button>
+            <button id="comms-sat" onclick="setCommsFilter('sat')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-indigo-200 hover:bg-indigo-500/20 transition">
+              SD-WAN
+            </button>
+            <button id="comms-navaids" onclick="setCommsFilter('navaids')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-amber-200 hover:bg-amber-500/20 transition">
+              VOR/AWOS
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[11px] space-y-1.5">
+            <div class="flex items-center gap-2 text-sky-200 font-medium">
+              <span class="w-3 h-3 rounded-full border-2 border-sky-300 bg-sky-400/35 inline-block shrink-0"></span>
+              <span class="text-[10px]">Rango Garantizado RDM (~5 km): Puesto de Mando / Base</span>
+            </div>
+            <div class="flex items-center gap-2 text-cyan-100">
+              <span class="w-3 h-3 rounded-full border border-dashed border-cyan-200 bg-cyan-400/15 inline-block shrink-0"></span>
+              <span class="text-[10px]">Alcance Potencial LOS / Río (~20 km, sujeto a selva)</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 space-y-0.5 text-[10px] text-white/80">
+              <div>• <strong>Trunking GTR8000 (3 ch):</strong> USD $360k (Araracuara/Pedrera)</div>
+              <div>• <strong>SD-WAN + Starlink LEO:</strong> ~$61 M COP/sitio (VSAT GEO)</div>
+              <div>• <strong>Radioayudas FAC:</strong> Proyección VOR/DME, LOC, GS y AWOS</div>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-white/80 cursor-pointer text-[10px]">
+                <input type="checkbox" id="toggleTrunkingRings" checked onchange="renderLayer11()" class="accent-sky-400 rounded">
+                <span>Mostrar anillos de cobertura Trunking</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA 12: ARQUITECTURA DE INVERSIÓN POR FUERZA (2027-2035) -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-yellow-300 shadow-[0_0_10px_#fde047]"></span>
+              <h2 class="text-sm font-semibold text-white">Capa 12: Inversión por Fuerza</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleLayer12" checked class="sr-only peer" onchange="toggleLayer(12)">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-yellow-400/90 peer-checked:border-yellow-200/50"></div>
+            </label>
+          </div>
+          <p class="text-xs text-white/75 mb-2.5">Consolidado presupuestal por base y Fuerza (<strong class="text-yellow-200">2027–2035</strong>):</p>
+
+          <div class="grid grid-cols-4 gap-1 liquid-segmented mb-2.5">
+            <button id="inv-all" onclick="setInvFilter('all')" class="py-1 px-1 text-[10px] font-semibold bg-yellow-300 text-slate-950 seg-active-pill transition">
+              Todas
+            </button>
+            <button id="inv-ejc" onclick="setInvFilter('ejc')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-emerald-200 hover:bg-emerald-500/20 transition">
+              EJC
+            </button>
+            <button id="inv-arc" onclick="setInvFilter('arc')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-indigo-200 hover:bg-indigo-500/20 transition">
+              ARC
+            </button>
+            <button id="inv-fac" onclick="setInvFilter('fac')" class="py-1 px-1 rounded-lg text-[10px] font-medium text-sky-200 hover:bg-sky-500/20 transition">
+              FAC
+            </button>
+          </div>
+
+          <div class="liquid-inset p-2.5 text-[10px] space-y-1 text-white/80">
+            <div class="flex justify-between">
+              <span class="text-emerald-300 font-semibold">● EJC – COING (3 Fases):</span>
+              <span class="font-mono font-bold text-white">$53.848,28 M</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-indigo-300 font-semibold">● ARC – Infraest. Naval:</span>
+              <span class="font-mono font-bold text-white">$88.700,00 M</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sky-300 font-semibold">● FAC – Prefact. / Pista:</span>
+              <span class="font-mono font-bold text-white">$67.723,70 M</span>
+            </div>
+            <div class="pt-1.5 border-t border-white/10 flex justify-between text-yellow-200">
+              <span>Aval CONPES 2026–2035:</span>
+              <span class="font-mono font-bold">$6,53 B ($1,68 B ASAES)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAPA AUXILIAR: DISTANCIAS ENTRE NODOS -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-300"></span>
+              <h2 class="text-sm font-semibold text-white">Líneas de Enlace entre Bases</h2>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="toggleDistances" checked class="sr-only peer" onchange="toggleDistancesLayer()">
+              <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-sky-500/85 peer-checked:border-sky-200/50"></div>
+            </label>
+          </div>
+          <p class="text-[11px] text-white/65 leading-relaxed">
+            Compara el radio de 40 millas frente a la distancia real entre nodos (ej. ~173 NM entre Araracuara y La Pedrera).
+          </p>
+        </div>
+
+        <!-- CARTOGRAFÍA BASE -->
+        <div class="liquid-card p-3.5">
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-white/65">Cartografía Base</h3>
+            <span class="text-[10px] font-mono text-emerald-200 bg-emerald-400/15 border border-emerald-300/30 px-2 py-0.5 rounded-full">✓ CARTO API</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5 liquid-segmented p-1.5">
+            <button onclick="setBasemap('satellite')" id="bm-satellite" class="bm-btn text-xs py-1.5 px-2 bg-white/25 text-white font-semibold seg-active-pill transition">Satélite</button>
+            <button onclick="setBasemap('dark')" id="bm-dark" class="bm-btn text-xs py-1.5 px-2 rounded-lg text-white/65 hover:text-white transition">Táctico Oscuro</button>
+            <button onclick="setBasemap('voyager')" id="bm-voyager" class="bm-btn text-xs py-1.5 px-2 rounded-lg text-white/65 hover:text-white transition">Carto Voyager</button>
+            <button onclick="setBasemap('topo')" id="bm-topo" class="bm-btn text-xs py-1.5 px-2 rounded-lg text-white/65 hover:text-white transition">Topográfico</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer de estado del panel -->
+      <div class="px-4 py-2.5 border-t border-white/15 bg-black/25 flex items-center justify-between text-[11px] text-white/65 shrink-0">
+        <span>Capas activas: <strong id="activeLayersCount" class="text-amber-300 font-bold">12</strong> / 12</span>
+        <span class="text-[10px] text-white/50">Plan Yuruparí • CGFM / J5</span>
+      </div>
+    </aside>
+
+    <!-- Barra Flotante Superior tipo Dynamic Island con Selector Rápido de Capas -->
+    <div id="floatingTopBar" class="fixed top-3 left-3 md:left-[398px] z-[950] flex items-center gap-1.5 p-1.5 rounded-[22px] liquid-pill max-w-[calc(100vw-24px)] md:max-w-[calc(100vw-464px)] transition-all duration-300 ease-out">
+      <!-- Controles fijos de acción rápida -->
+      <div class="flex items-center gap-1 shrink-0">
+        <button onclick="toggleSidebar()" title="Abrir o cerrar panel de filtros y detalles" class="px-2.5 py-1.5 rounded-full liquid-btn text-white text-xs font-semibold flex items-center gap-1.5">
+          <span>⚙ Filtros</span>
+          <span id="floatingLayerCount" class="bg-amber-400 text-slate-950 font-bold text-[10px] px-1.5 py-0.2 rounded-full shadow-sm">12</span>
+        </button>
+        <button onclick="fitAllBases()" title="Centrar en las 3 bases" class="px-2.5 py-1.5 rounded-full hover:bg-white/15 text-white/90 hover:text-white text-xs font-medium transition active:scale-95">
+          Centrar
+        </button>
+        <button onclick="resetToLayer1Only()" title="Dejar activas únicamente las 3 bases" class="px-2.5 py-1.5 rounded-full bg-rose-500/25 hover:bg-rose-500/35 text-rose-100 border border-rose-300/35 text-xs font-semibold transition active:scale-95">
+          Solo Bases
+        </button>
+      </div>
+
+      <div class="h-5 w-[1px] bg-white/20 shrink-0 mx-0.5"></div>
+
+      <!-- Píldoras interactivas para activar/desactivar cada capa -->
+      <div id="islandLayersContainer" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 pr-1">
+        <!-- Generado dinámicamente por JS -->
+      </div>
+    </div>
+
+    <!-- Map Container -->
+    <main id="map" class="w-full h-full z-10"></main>
+  </div>
+
+  <script>
+    // 1. Datos de las 3 poblaciones (Capa 1)
+    const locations = [
+      {
+        id: 'araracuara',
+        name: 'Araracuara',
+        dept: 'Solano, Caquetá',
+        oaci: 'SKAC',
+        lat: -0.6169,
+        lng: -72.3822,
+        coordsText: '0° 37\' 01" S, 72° 22\' 56" O',
+        pop: '~165 hab. núcleo urbano + resguardo Monochoa',
+        econ: 'Chagra indígena, pesca artesanal río Caquetá y base militar. Pista actual 1.200m × 18m (proyección CONPES a 1.800m × 18m).',
+        unit: 'BATOT21 y BILAC50',
+        fieldAudit: 'Visita técnica conjunta (COING, ARC y FAC). PTAP inoperativa; infraestructura física deteriorada (requiere cuarto de plantas, PTAR nueva y adecuación de redes).'
+      },
+      {
+        id: 'pedrera',
+        name: 'La Pedrera',
+        dept: 'ANM, Amazonas',
+        oaci: 'SKLP',
+        lat: -1.3286,
+        lng: -69.5797,
+        coordsText: '1° 19\' 43" S, 69° 34\' 47" O',
+        pop: '~4.132 – 4.985 hab. (proyección DANE)',
+        econ: 'Pesca comercial/ornamental, comercio fronterizo con Brasil (Vila Bittencourt) y nodo estratégico del bajo Caquetá.',
+        unit: 'BILAC50 / GAAMA',
+        fieldAudit: 'Visita técnica COING. PTAP requiere mantenimiento. ⚠️ Alerta Seguridad Operacional (RAC 14): cementerio ubicado a 360 m de la pista.'
+      },
+      {
+        id: 'barrancominas',
+        name: 'Barrancominas',
+        dept: 'Municipio, Guainía',
+        oaci: 'SKBM',
+        lat: 3.49084,
+        lng: -69.80716,
+        coordsText: '3° 29\' 27" N, 69° 48\' 26" O',
+        pop: '~11.709 – 12.020 hab. (cabecera ~1.311)',
+        econ: 'Nodo comercial/fluvial sobre río Guaviare (5.533 pax y 501 t carga en 2025). Pista actual 1.105m (mejoramiento CONPES 903m × 17m).',
+        unit: 'BIPIN45 y PFA52 (Base El Galante)',
+        fieldAudit: 'Visita técnica COING. Requiere PTAR nueva, sistema eléctrico y reubicación de shelter/torre de comunicaciones a sitio más seguro.'
+      }
+    ];
+
+    // Red de 12 Aeródromos de la Diapositiva FAC con sus colores (Capa 2)
+    const facAerodromes = [
+      { oaci: 'SKAC', name: 'Araracuara', dept: 'Caquetá', lat: -0.6169, lng: -72.3822, group: 'red', role: 'Nodo Prioritario Plan Yuruparí • Prefactibilidad FAC: $67.723,7 M COP (pavimento concreto MR-45, logística hasta $34.500 M, combustible modular $650M–$3.500M) + CONPES 4205 ampliación a 1.800m × 18m ($17.603 M E&D 2027).' },
+      { oaci: 'SKLP', name: 'La Pedrera', dept: 'Amazonas', lat: -1.3286, lng: -69.5797, group: 'red', role: 'Nodo Prioritario Plan Yuruparí • Prefactibilidad FAC: $67.723,7 M COP (concreto MR-45 + estación combustible modular $650M–$3.500M). Requiere mitigación predial por cementerio a 360 m de pista (RAC 14).' },
+      { oaci: 'SKBM', name: 'Barrancominas', dept: 'Guainía', lat: 3.49084, lng: -69.80716, group: 'red', role: 'Nodo Prioritario Plan Yuruparí • Prefactibilidad FAC: $67.723,7 M COP (concreto MR-45 + estación combustible modular $650M–$3.500M) + CONPES 4205 mejoramiento pista 903m × 17m.' },
+      { oaci: 'SKUC', name: 'Santiago Pérez Quiroz (Arauca)', dept: 'Arauca', lat: 7.0689, lng: -70.7369, group: 'yellow', role: 'Aeropuerto Controlado • Eje Norte Orinoquía' },
+      { oaci: 'SKPD', name: 'César Gaviria Trujillo (Inírida)', dept: 'Guainía', lat: 3.8536, lng: -67.9061, group: 'yellow', role: 'Aeropuerto Controlado / ASAES CONPES 4205 • Mejoramiento pista 2.050m × 30m, calle de rodaje, cerramiento y ayudas visuales.' },
+      { oaci: 'SKSJ', name: 'Jorge E. González (San José del Guaviare)', dept: 'Guaviare', lat: 2.5797, lng: -72.6394, group: 'yellow', role: 'Hub Militar y Comercial (70% vocación militar / Antinarcóticos)' },
+      { oaci: 'SKNA', name: 'Javier Noreña Valencia (La Macarena)', dept: 'Meta', lat: 2.1792, lng: -73.7875, group: 'yellow', role: 'Aeródromo Controlado / ASAES CONPES 4205 • Ampliación pista a 1.600m × 30m, plataforma, calle de rodaje, drenajes y cerramiento.' },
+      { oaci: 'SKMU', name: 'Fabio León Bentley (Mitú)', dept: 'Vaupés', lat: 1.2536, lng: -70.2339, group: 'yellow', role: 'Aeropuerto Controlado • Nodo Central Vaupés' },
+      { oaci: 'SKYP', name: 'El Alcaraván (Yopal)', dept: 'Casanare', lat: 5.3191, lng: -72.3840, group: 'blue', role: 'Base Aérea / Grupo Aéreo del Casanare (GACAS)' },
+      { oaci: 'SKUA', name: 'Base Aérea Marandúa (GAORI)', dept: 'Vichada', lat: 5.5245, lng: -68.6856, group: 'blue', role: 'Grupo Aéreo del Oriente (GAORI - FAC)' },
+      { oaci: 'SKTQ', name: 'Base Aérea Tres Esquinas (CACOM 6)', dept: 'Caquetá', lat: 0.7458, lng: -75.2342, group: 'blue', role: 'Comando Aéreo de Combate No. 6 (CACOM 6 - FAC)' },
+      { oaci: 'SKLT', name: 'Alfredo Vásquez Cobo (Leticia)', dept: 'Amazonas', lat: -4.1935, lng: -69.9432, group: 'blue', role: 'Grupo Aéreo del Amazonas (GAAMA) • Trapecio Amazónico' }
+    ];
+
+    const facColorPalette = {
+      red: { stroke: '#ef4444', fill: '#dc2626', badgeBorder: '#ef4444', label: 'Prioritario Yuruparí' },
+      yellow: { stroke: '#facc15', fill: '#eab308', badgeBorder: '#eab308', label: 'Apoyo Regional' },
+      blue: { stroke: '#3b82f6', fill: '#2563eb', badgeBorder: '#3b82f6', label: 'Base FAC / Estratégico' }
+    };
+
+    let currentFacGroupFilter = 'all';
+
+    // 2. Inicializar Mapa y Mapas Base
+    const map = L.map('map', {
+      center: [1.5, -71.0],
+      zoom: 6,
+      zoomControl: false
+    });
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    const CARTO_API_KEY = 'cb1_5bre_1_d0208201307b23c4e5aaee0e';
+
+    const basemaps = {
+      satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
+      }),
+      dark: L.tileLayer(`https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`, {
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+      }),
+      voyager: L.tileLayer(`https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`, {
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+      }),
+      topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+      })
+    };
+
+    let currentBasemap = basemaps.satellite.addTo(map);
+
+    const labelsLayer = L.tileLayer(`https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`, {
+      pane: 'shadowPane'
+    }).addTo(map);
+
+    function setBasemap(key) {
+      map.removeLayer(currentBasemap);
+      currentBasemap = basemaps[key];
+      currentBasemap.addTo(map);
+      if (key === 'satellite') {
+        labelsLayer.addTo(map);
+      } else {
+        map.removeLayer(labelsLayer);
+      }
+      document.querySelectorAll('.bm-btn').forEach(btn => {
+        btn.className = 'bm-btn text-xs py-1.5 px-2 rounded-lg text-white/65 hover:text-white transition';
+      });
+      const activeBtn = document.getElementById('bm-' + key);
+      activeBtn.className = 'bm-btn text-xs py-1.5 px-2 bg-white/25 text-white font-semibold seg-active-pill transition';
+    }
+
+    // 3. Grupos de Capas
+    const layer4Group = L.layerGroup().addTo(map);
+    const layer5Group = L.layerGroup().addTo(map);
+    const layer6Group = L.layerGroup().addTo(map);
+    const layer10Group = L.layerGroup().addTo(map);
+    const layer8Group = L.layerGroup().addTo(map);
+    const layer3Group = L.layerGroup().addTo(map);
+    const layer2Group = L.layerGroup().addTo(map);
+    const layer11Group = L.layerGroup().addTo(map);
+    const layer12Group = L.layerGroup().addTo(map);
+    const layer9Group = L.layerGroup().addTo(map);
+    const layer7Group = L.layerGroup().addTo(map);
+    const distanceGroup = L.layerGroup().addTo(map);
+    const layer1Group = L.layerGroup().addTo(map);
+
+    // Datos Capa 10: Presencia de GAO y GAO-r
+    const gaoStructuresData = [
+      {
+        name: 'GAO-r E. “Carolina Ramírez”',
+        faction: 'GAO-r (F. “a. Iván Mordisco”)',
+        category: 'gaor',
+        region: 'Región 4 — Amazonía (Caquetá / Amazonas)',
+        lat: -0.42,
+        lng: -72.85,
+        threatLevel: 'Alta — Presión directa sobre Araracuara',
+        detail: 'Opera sobre el eje medio del río Caquetá (Solano – Araracuara) y borde sur del PNN Chiribiquete. Mantiene confrontación con Comandos de Frontera por el control de pasta base de coca (CHC) y corredores fluviales.',
+        zoneCoords: [
+          [0.35, -74.10], [0.25, -72.45], [-0.55, -71.90], [-1.05, -72.35],
+          [-0.95, -73.65], [-0.25, -74.25]
+        ]
+      },
+      {
+        name: 'GAO-r E. “Comandos de Frontera” (CNEB)',
+        faction: 'GAO-r CNEB / Segunda Marquetalia',
+        category: 'gaor',
+        region: 'Región 4 — Amazonía (Putumayo / Alto Caquetá)',
+        lat: -0.12,
+        lng: -75.15,
+        threatLevel: 'Muy Alta — Eje de conflictividad Putumayo',
+        detail: 'Controla enclaves de CHC y corredores fluviales binacionales en los ríos Putumayo, Mecaya, Yurilla y Caquetá (Puerto Leguízamo, Puerto Asís, La Tagua). Articulación con DOT de Ecuador, Perú y Brasil.',
+        zoneCoords: [
+          [0.55, -76.55], [0.35, -74.85], [-0.35, -74.45], [-0.75, -75.25],
+          [-0.35, -76.35]
+        ]
+      },
+      {
+        name: 'GAO-r E. “Raúl Reyes”',
+        faction: 'GAO-r (Bloque Suroriental / Amazonas)',
+        category: 'gaor',
+        region: 'Región 4 — Amazonía (Caquetá / Caguán)',
+        lat: 1.05,
+        lng: -74.45,
+        threatLevel: 'Alta — Finanzas por CHC y deforestación',
+        detail: 'Injerencia en Cartagena del Chairá, río Caguán y Sabanas del Yarí. Dinamiza la deforestación con maquinaria amarilla y extorsión sobre corredores hacia el norte de Putumayo y Chiribiquete.',
+        zoneCoords: [
+          [1.65, -75.15], [1.55, -73.85], [0.75, -73.75], [0.45, -74.55],
+          [0.85, -75.25]
+        ]
+      },
+      {
+        name: 'GAO-r SE. 53 “Edison Romaña”',
+        faction: 'GAO-r (F. “a. Calarcá”)',
+        category: 'gaor',
+        region: 'Región 3 / 4 — Bisagra Meta – Guaviare',
+        lat: 2.38,
+        lng: -73.15,
+        threatLevel: 'Alta — Retaguardia estratégica Chiribiquete',
+        detail: 'Aprovecha la Serranía del PNN Chiribiquete como eje de conexión Orinoquía–Amazonía y retaguardia estratégica, impulsando vías ilegales (Tunia–Ajajú y Cachicamo–Tunia) y ganadería extensiva.',
+        zoneCoords: [
+          [2.95, -74.05], [2.85, -72.55], [1.95, -72.25], [1.75, -73.45],
+          [2.25, -74.15]
+        ]
+      },
+      {
+        name: 'GAO-r E. “Jhonier Arenas”',
+        faction: 'GAO-r (F. “a. Calarcá”)',
+        category: 'gaor',
+        region: 'Región 4 — Guaviare / Vaupés',
+        lat: 1.82,
+        lng: -71.85,
+        threatLevel: 'Alta — Control de corredores Guaviare–Vaupés',
+        detail: 'Opera entre Calamar, Miraflores y el occidente del Vaupés (Carurú), controlando cultivos ilícitos (5.260 ha en Guaviare) y rutas fluviales hacia los ríos Inírida y Vaupés.',
+        zoneCoords: [
+          [2.35, -72.45], [2.25, -71.15], [1.35, -71.05], [1.25, -72.15]
+        ]
+      },
+      {
+        name: 'GAO-r SM — E. “Acacio Medina”',
+        faction: 'GAO-r Segunda Marquetalia (SM)',
+        category: 'eln_sm',
+        region: 'Región 3 / 4 — Guainía / Sur de Vichada',
+        lat: 3.15,
+        lng: -69.25,
+        threatLevel: 'Alta — Presión directa sobre Barrancominas',
+        detail: 'Estructura principal en el Escudo Guayanés (Barrancominas, río Inírida, RNN Puinawai, San Felipe y frontera con Venezuela/Brasil). Dinamiza outsourcing criminal para tráfico de oro ilegal y tierras raras/coltán hacia el Meta.',
+        zoneCoords: [
+          [3.95, -70.35], [4.05, -67.85], [2.15, -67.55], [1.85, -69.45],
+          [2.85, -70.45]
+        ]
+      },
+      {
+        name: 'GAO-ELN — Frente “José Daniel Pérez Carrero”',
+        faction: 'GAO “ELN” (Frente de Guerra Oriental)',
+        category: 'eln_sm',
+        region: 'Región 3 — Orinoquía (Arauca / Casanare / Vichada)',
+        lat: 6.35,
+        lng: -70.35,
+        threatLevel: 'Alta — Convergencia fronteriza Orinoco',
+        detail: 'Control de pasos informales en la frontera colombo-venezolana, extorsión, economías ilícitas y articulación con redes transnacionales en los ejes de los ríos Arauca, Meta y Orinoco.',
+        zoneCoords: [
+          [7.05, -71.85], [6.95, -69.55], [5.65, -68.45], [5.45, -70.85],
+          [6.15, -71.95]
+        ]
+      },
+      {
+        name: 'GAO “Clan del Golfo” y Enlaces DOT',
+        faction: 'GAO “Clan del Golfo” / Redes Transnacionales',
+        category: 'cdg_dot',
+        region: 'Región 3 — Piedemonte y Altillanura del Meta',
+        lat: 3.85,
+        lng: -72.85,
+        threatLevel: 'Media-Alta — Alianzas criminales internacionales',
+        detail: 'Proyección sobre corredores del Meta (Villavicencio – Puerto Gaitán – Mapiripán) con reportes de inteligencia militar sobre alianzas con mafias ecuatorianas (Los Choneros) para expandir rutas de narcotráfico y lavado de activos.',
+        zoneCoords: [
+          [4.35, -73.65], [4.45, -71.85], [3.35, -71.75], [3.25, -73.55]
+        ]
+      },
+      {
+        name: 'Nodo Transnacional Bajo Caquetá – Amazonas',
+        faction: 'DOT (Brasil / México) y Redes Locales',
+        category: 'cdg_dot',
+        region: 'Región 4 — La Pedrera / Tarapacá / Leticia',
+        lat: -1.65,
+        lng: -69.65,
+        threatLevel: 'Alta — Corredor fluvial Atlántico–Pacífico',
+        detail: 'Zona de convergencia entre estructuras residuales y delincuencia organizada transnacional (Cartel de Sinaloa, CJNG y facciones brasileñas) en la frontera La Pedrera–Vila Bittencourt y Tarapacá para tráfico de CHC y oro de dragas.',
+        zoneCoords: [
+          [-1.05, -70.35], [-1.15, -69.42], [-2.95, -69.55], [-2.85, -70.25]
+        ]
+      }
+    ];
+
+    let currentGaoFilter = 'all';
+
+    // Datos Capa 7: Puestos Fluviales Avanzados (PFA) y Unidades Navales ARC
+    const pfaPostsData = [
+      { name: 'PFA Barrancominas / PFA52 (Proyección ARC)', river: 'Río Guaviare', dept: 'Guainía', lat: 3.4955, lng: -69.8010, category: 'yurupari', unit: 'PFA52 / BFLIM / Armada Nacional', detail: 'Inversión proyectada ARC por $62.000 M COP desglosada en: protección de base ($14.000 M), instalaciones habitables ($28.000 M) y muelle/control de erosión ($20.000 M). Articulación conjunta con BIPIN45.' },
+      { name: 'PFA La Pedrera (Proyección ARC)', river: 'Río Caquetá', dept: 'Amazonas', lat: -1.3245, lng: -69.5740, category: 'yurupari', unit: 'Fuerza Naval de la Amazonía', detail: 'Inversión proyectada ARC por $26.700 M COP para infraestructura habitable, sostenimiento naval y control fronterizo frente a Vila Bittencourt (Brasil).' },
+      { name: 'PFA Araracuara (Control Fluvial)', river: 'Río Caquetá', dept: 'Caquetá / Amazonas', lat: -0.6225, lng: -72.3765, category: 'yurupari', unit: 'Control Fluvial Caquetá', detail: 'Punto estratégico sobre los raudales de Araracuara para interdicción fluvial en el medio río Caquetá (visitado técnicamente por ARC).' },
+      { name: 'Base Naval ARC Puerto Leguízamo (BFLIM30)', river: 'Río Putumayo', dept: 'Putumayo', lat: -0.1945, lng: -74.7810, category: 'frontera', unit: 'BRIM3 / BFLIM30', detail: 'Comando de Brigada de Infantería de Marina No. 3. Nodo principal de sostenimiento naval en el sur.' },
+      { name: 'PFA La Tagua', river: 'Río Caquetá', dept: 'Putumayo', lat: -0.0540, lng: -74.6640, category: 'frontera', unit: 'BFLIM30', detail: 'Bisagra intermodal terrestre-fluvial entre los ríos Putumayo (Leguízamo) y Caquetá.' },
+      { name: 'PFA Puerto Ospina', river: 'Río Putumayo', dept: 'Putumayo', lat: 0.1580, lng: -75.8350, category: 'frontera', unit: 'BFLIM30', detail: 'Puesto fluvial de control sobre el eje medio-alto del río Putumayo en frontera con Ecuador.' },
+      { name: 'PFA KM 22', river: 'Río Putumayo', dept: 'Putumayo', lat: 0.3850, lng: -76.2200, category: 'frontera', unit: 'BFLIM30', detail: 'Puesto avanzado de interdicción en el corredor de cultivos ilícitos del alto Putumayo.' },
+      { name: 'PFA El Encanto', river: 'Río Caraparaná / Putumayo', dept: 'Amazonas', lat: -1.7480, lng: -73.2080, category: 'frontera', unit: 'Fuerza Naval Amazonía', detail: 'Presencia naval permanente en el área no municipalizada de El Encanto (Amazonas).' },
+      { name: 'PFA Tarapacá', river: 'Río Putumayo / Cotuhé', dept: 'Amazonas', lat: -2.8780, lng: -69.7420, category: 'frontera', unit: 'BFLIM33', detail: 'Control en la frontera con Brasil y Perú; punto crítico contra dragas de minería ilegal (EIYM).' },
+      { name: 'PFA San Juan de Atacuarí', river: 'Río Amazonas', dept: 'Amazonas', lat: -3.8150, lng: -70.6850, category: 'frontera', unit: 'BFLIM33', detail: 'Control fluvial sobre el trapecio amazónico en frontera con Perú.' },
+      { name: 'Grupo Guardacostas Amazonas (Leticia)', river: 'Río Amazonas', dept: 'Amazonas', lat: -4.2080, lng: -69.9460, category: 'frontera', unit: 'BFLIM33 / Guardacostas', detail: 'Control trifronterizo Colombia–Perú–Brasil sobre el río Amazonas.' },
+      { name: 'PFA San Felipe', river: 'Río Negro / Guainía', dept: 'Guainía', lat: 1.9150, lng: -67.0750, category: 'frontera', unit: 'Fuerza Naval del Oriente', detail: 'Puesto trifronterizo (Colombia–Venezuela–Brasil) clave para interdicción de oro y coltán.' },
+      { name: 'PFA Puerto Inírida', river: 'Río Inírida / Guaviare', dept: 'Guainía', lat: 3.8660, lng: -67.9230, category: 'frontera', unit: 'BFLIM31 / PFA63', detail: 'Control de la Estrella Fluvial de Inírida y desembocadura hacia el Orinoco.' },
+      { name: 'PFA Amanavén / Santa Rita', river: 'Confluencia Guaviare–Orinoco', dept: 'Vichada', lat: 4.0420, lng: -67.7150, category: 'frontera', unit: 'BFLIM31', detail: 'Cierre estratégico en la desembocadura del río Guaviare sobre el eje fronterizo del Orinoco.' },
+      { name: 'Base Naval del Oriente (Puerto Carreño)', river: 'Confluencia Orinoco–Meta', dept: 'Vichada', lat: 6.1880, lng: -67.4850, category: 'frontera', unit: 'Fuerza Naval del Oriente', detail: 'Comando naval regional en el vértice norte de la Orinoquía.' }
+    ];
+
+    let currentPfaFilter = 'all';
+
+    // Datos Capa 8: Red Vial Terrestre Existente (1.206 km)
+    const terrestrialRoadsData = [
+      {
+        name: 'Troncal Piedemonte Llanero (Villavicencio – Yopal – Saravena – Arauca)',
+        km: '~685 km',
+        status: 'Vía Primaria Pavimentada / Borde Occidental',
+        detail: 'Articula el borde andino desde Meta hasta Arauca, sin penetración hacia la altillanura profunda ni la selva.',
+        coords: [[4.14, -73.63], [4.45, -73.12], [4.95, -72.75], [5.33, -72.39], [5.85, -71.95], [6.46, -71.73], [6.95, -71.87], [7.01, -71.42], [7.08, -70.75]]
+      },
+      {
+        name: 'Eje Altillanura Meta (Villavicencio – Puerto López – Puerto Gaitán)',
+        km: '~245 km',
+        status: 'Corredor Vial Altillanura',
+        detail: 'Conecta hasta Puerto Gaitán y Puente Arimena; desde allí hacia Vichada y Barrancominas no existe carretera pavimentada.',
+        coords: [[4.14, -73.63], [4.08, -72.95], [4.31, -72.08], [4.42, -71.45]]
+      },
+      {
+        name: 'Eje Sur Meta – Guaviare (Granada – San José del Guaviare – Calamar)',
+        km: '~276 km',
+        status: 'Último tramo vial hacia la Amazonía',
+        detail: 'Finaliza en Calamar (Guaviare). Más al sur (Miraflores, Araracuara, Mitú, La Pedrera) la conectividad terrestre es 0 km.',
+        coords: [[3.54, -73.71], [3.25, -73.85], [3.12, -73.75], [2.65, -72.76], [2.57, -72.64], [2.25, -72.65], [1.96, -72.65]]
+      },
+      {
+        name: 'Corredores Piedemonte Caquetá y Putumayo (Florencia / Mocoa – Puerto Asís)',
+        km: 'Conectividad Borde Andino',
+        status: 'Vías de Piedemonte',
+        detail: 'Llegan hasta San Vicente del Caguán, Cartagena del Chairá (trocha) y Puerto Asís, sin conexión terrestre con Araracuara.',
+        coords: [[2.11, -74.77], [1.75, -75.25], [1.61, -75.61], [1.31, -75.87], [1.15, -76.65], [0.51, -76.50]]
+      },
+      {
+        name: 'Tramos Locales Aislados (La Macarena / Puerto Carreño / Leticia km 21)',
+        km: 'Tramos urbanos/rurales cortos',
+        status: 'Islas Viales sin Red Nacional',
+        detail: 'Vías locales desconectadas de la red vial nacional: casco urbano/rural de La Macarena, tramo Puerto Carreño–Casuarito y carretera Leticia–Tarapacá (km 21).',
+        coords: [
+          [[2.18, -73.79], [2.12, -73.72]],
+          [[6.18, -67.49], [6.08, -67.62]],
+          [[-4.21, -69.94], [-4.02, -69.99]]
+        ]
+      }
+    ];
+
+    // Datos Capa 9: Viabilidad de Aeródromos Regionales + Obras CONPES 4205 ASAES
+    const regionalAerodromesViability = [
+      { oaci: 'SKAC', name: 'Araracuara (Obra CONPES 4205)', dept: 'Caquetá', lat: -0.6135, lng: -72.3860, status: 'viable', obs: 'CONPES 4205 / ASAES • Ampliación y mejoramiento de pista a 1.800 m × 18 m + Estudios y Diseños ($17.603 M COP en vigencia 2027).' },
+      { oaci: 'SKBM', name: 'Barrancominas (Obra CONPES 4205)', dept: 'Guainía', lat: 3.4945, lng: -69.8110, status: 'viable', obs: 'CONPES 4205 / ASAES • Mejoramiento de pista (903 m × 17 m) para operación regional segura en el río Guaviare.' },
+      { oaci: 'SKNA', name: 'La Macarena / Javier Noreña (CONPES 4205)', dept: 'Meta', lat: 2.1830, lng: -73.7910, status: 'viable', obs: 'CONPES 4205 / ASAES • Ampliación de pista a 1.600 m × 30 m, plataforma, calle de rodaje, drenajes y cerramiento.' },
+      { oaci: 'SKPD', name: 'Inírida / César Gaviria (CONPES 4205)', dept: 'Guainía', lat: 3.8570, lng: -67.9100, status: 'viable', obs: 'CONPES 4205 / ASAES • Mejoramiento de pista (2.050 m × 30 m), calle de rodaje, cerramiento y ayudas visuales.' },
+      { oaci: 'SKAP', name: 'Apiay / Gómez Niño (Base FAC)', dept: 'Meta', lat: 4.0761, lng: -73.5625, status: 'viable', obs: 'VIABLE • Realizar coordinación previa FAC (CACOM 2).' },
+      { oaci: 'SKVV', name: 'Villavicencio / Vanguardia', dept: 'Meta', lat: 4.1678, lng: -73.6136, status: 'viable', obs: 'VIABLE • Hub aerocomercial y logístico de entrada a Orinoquía.' },
+      { oaci: 'SKPC', name: 'Puerto Carreño / Germán Olano', dept: 'Vichada', lat: 6.1847, lng: -67.4931, status: 'viable', obs: 'VIABLE • Aeropuerto regional eje río Orinoco.' },
+      { oaci: 'SKIM', name: 'La Primavera', dept: 'Vichada', lat: 5.4850, lng: -70.4150, status: 'viable', obs: 'VIABLE • Pista operativa en eje río Meta.' },
+      { oaci: 'SKUM', name: 'Cumaribo', dept: 'Vichada', lat: 4.4450, lng: -69.7950, status: 'viable', obs: 'VIABLE • Nodo central del departamento de Vichada.' },
+      { oaci: 'SKCI', name: 'Carimagua', dept: 'Meta', lat: 4.5680, lng: -71.3350, status: 'viable', obs: 'VIABLE • Pista de apoyo en altillanura oriental.' },
+      { oaci: 'SKSA', name: 'Saravena / Los Colonizadores', dept: 'Arauca', lat: 6.9581, lng: -71.8556, status: 'viable', obs: 'VIABLE • Aeródromo operativo frontera norte.' },
+      { oaci: 'SKTM', name: 'Tame / Gustavo Vargas', dept: 'Arauca', lat: 6.4511, lng: -71.7603, status: 'viable', obs: 'VIABLE • Aeródromo operativo piedemonte araucano.' },
+      { oaci: 'SKRD', name: 'Puerto Rondón', dept: 'Arauca', lat: 6.2850, lng: -71.1020, status: 'viable', obs: 'VIABLE • Pista operativa en sabanas de Arauca.' },
+      { oaci: 'SKOE', name: 'Orocué', dept: 'Casanare', lat: 4.7910, lng: -71.3450, status: 'viable', obs: 'VIABLE • Punto de apoyo sobre el río Meta.' },
+      { oaci: 'SKVN', name: 'Villanueva', dept: 'Casanare', lat: 4.6050, lng: -72.9280, status: 'viable', obs: 'VIABLE • Pista operativa sur de Casanare.' },
+      { oaci: 'SKMO', name: 'Morelia', dept: 'Caquetá', lat: 1.4880, lng: -75.7250, status: 'viable', obs: 'VIABLE • Pista de apoyo en Caquetá.' },
+      { oaci: 'SKJR', name: 'Jaguar', dept: 'Meta / Caquetá', lat: 2.0500, lng: -74.5500, status: 'viable', obs: 'VIABLE • Pista auxiliar regional.' },
+      { oaci: 'SQOL', name: 'La Loma', dept: 'Meta', lat: 3.3200, lng: -73.4500, status: 'viable', obs: 'VIABLE • Pista auxiliar en el departamento del Meta.' },
+      { oaci: 'SKMF', name: 'Miraflores', dept: 'Guaviare', lat: 1.3480, lng: -71.9450, status: 'restricted', obs: 'VIABLE CON RESTRICCIÓN • No ingresar en temporada invernal.' },
+      { oaci: 'SKCR', name: 'Carurú', dept: 'Vaupés', lat: 1.0120, lng: -71.2980, status: 'restricted', obs: 'VIABLE CON RESTRICCIÓN • No ingresar en temporada invernal.' },
+      { oaci: 'SKTR', name: 'Taraira', dept: 'Vaupés', lat: -0.5620, lng: -69.6350, status: 'restricted', obs: 'VIABLE CON RESTRICCIÓN • No ingresar en temporada invernal.' },
+      { oaci: 'SKUB', name: 'La Uribe', dept: 'Meta', lat: 3.2380, lng: -74.3480, status: 'restricted', obs: 'VIABLE CON RESTRICCIÓN • Se restringe la pernocta de aeronaves.' },
+      { oaci: 'SKIR', name: 'Mapiripán', dept: 'Meta', lat: 2.8920, lng: -72.1350, status: 'unviable', obs: 'NO VIABLE • Condiciones deterioradas de pista.' },
+      { oaci: 'SKUV', name: 'Guérima', dept: 'Vichada', lat: 4.1850, lng: -69.5120, status: 'unviable', obs: 'RESTRINGIDO / NO VIABLE • Pista no preparada.' },
+      { oaci: 'SKFP', name: 'San Felipe', dept: 'Guainía', lat: 1.9180, lng: -67.0720, status: 'unviable', obs: 'RESTRINGIDO / NO VIABLE • Pista no preparada (trifrontera).' },
+      { oaci: 'SKTD', name: 'Trinidad', dept: 'Casanare', lat: 5.4120, lng: -71.6620, status: 'unviable', obs: 'RESTRINGIDO / NO VIABLE • Pista no preparada.' },
+      { oaci: 'SKPZ', name: 'Paz de Ariporo', dept: 'Casanare', lat: 5.8760, lng: -71.8880, status: 'unviable', obs: 'NO VIABLE • Pista cerrada por mantenimiento.' }
+    ];
+
+    let currentAeroStatusFilter = 'all';
+
+    // Datos Capa 6: Cultivos Ilícitos de Coca
+    const cocaClusters = [
+      {
+        name: 'Núcleo Caquetá (Solano – Cartagena del Chairá – Caguán)',
+        dept: 'Caquetá',
+        region: 'amazonia',
+        gudet2025: '8.537 ha',
+        simci2024: '6.590 ha',
+        density: 'Alta concentración',
+        analysis: 'Mayor concentración departamental del área de estudio (+29,5% vs SIMCI 2024). Eje de producción primaria de pasta base articulado con los ríos Caguán, Orteguaza y Caquetá hacia Araracuara.',
+        coords: [[1.25, -75.45], [1.35, -74.55], [0.85, -74.15], [0.25, -74.25], [0.05, -74.95], [0.55, -75.55]]
+      },
+      {
+        name: 'Núcleo Putumayo (Puerto Asís – Leguízamo – Mecaya)',
+        dept: 'Putumayo (Eje Fronterizo)',
+        region: 'amazonia',
+        gudet2025: 'Eje crítico de expansión',
+        simci2024: 'Alta densidad fronteriza',
+        density: 'Muy alta concentración',
+        analysis: 'Foco de disputa armada entre Comandos de Frontera, E. Carolina Ramírez y E. Raúl Reyes. Plataforma de salida fluvial por los ríos Putumayo y Caquetá hacia Brasil y Perú.',
+        coords: [[0.65, -76.55], [0.45, -75.65], [-0.15, -74.85], [-0.45, -75.15], [-0.15, -76.15], [0.25, -76.65]]
+      },
+      {
+        name: 'Núcleo Guaviare (Miraflores – Calamar – El Retorno)',
+        dept: 'Guaviare',
+        region: 'orinoquia',
+        gudet2025: '5.260 ha',
+        simci2024: '4.970 ha',
+        density: 'Alta concentración',
+        analysis: 'Segundo departamento con mayor área sembrada. Rodea los resguardos Nukak y el borde norte del PNN Chiribiquete, alimentando corredores hacia Vaupés y Vichada.',
+        coords: [[2.35, -73.05], [2.45, -72.05], [1.95, -71.55], [1.45, -71.75], [1.55, -72.65], [1.95, -73.15]]
+      },
+      {
+        name: 'Núcleo Sur del Meta (La Macarena – Vista Hermosa – Mapiripán)',
+        dept: 'Meta',
+        region: 'orinoquia',
+        gudet2025: '2.409 ha',
+        simci2024: '2.194 ha',
+        density: 'Media-alta concentración',
+        analysis: 'Enclaves ubicados sobre las vegas del río Guaviare y áreas de amortiguación de La Macarena y Tinigua, articulados con el transporte fluvial hacia Barrancominas.',
+        coords: [[2.95, -74.05], [3.05, -73.15], [2.75, -72.15], [2.45, -72.25], [2.45, -73.35], [2.65, -74.05]]
+      },
+      {
+        name: 'Enclave Sur de Vichada (Cumaribo – Interfluvio Vichada/Guaviare)',
+        dept: 'Vichada',
+        region: 'orinoquia',
+        gudet2025: '569 ha',
+        simci2024: '343 ha',
+        density: 'Focalizada (+65,9%)',
+        analysis: 'Incremento significativo en el sur de Cumaribo al norte de Barrancominas, aprovechando esteros y caños navegables hacia el río Orinoco.',
+        coords: [[4.25, -70.65], [4.35, -69.65], [3.85, -69.55], [3.75, -70.55]]
+      },
+      {
+        name: 'Enclaves Dispersos Amazonas (La Chorrera – Tarapacá – Mirití)',
+        dept: 'Amazonas',
+        region: 'amazonia',
+        gudet2025: '139 ha',
+        simci2024: '66 ha',
+        density: 'Dispersa (+110,6%)',
+        analysis: 'Pequeños lotes en áreas no municipalizadas sobre corredores de los ríos Caquetá, Putumayo e Igará-Paraná que funcionan como puntos de acopio y tránsito.',
+        coords: [[-0.85, -72.25], [-0.95, -71.45], [-1.45, -71.35], [-1.35, -72.15]]
+      },
+      {
+        name: 'Enclaves Dispersos Vaupés y Guainía (Carurú – Barrancominas)',
+        dept: 'Vaupés y Guainía',
+        region: 'amazonia',
+        gudet2025: '110 ha (57 Vaupés / 53 Guainía)',
+        simci2024: '56 ha (14 Vaupés / 42 Guainía)',
+        density: 'Baja / Corredor de tránsito',
+        analysis: 'Cultivos focalizados en el occidente del Vaupés (Carurú) y el eje medio del río Guaviare en Guainía, vinculados a rutas hacia Brasil y Venezuela.',
+        coords: [[3.25, -70.45], [3.35, -69.65], [2.85, -69.55], [2.75, -70.35]]
+      }
+    ];
+
+    let currentCocaFilter = 'all';
+
+    // Datos Capa 5: Deforestación y Minería Ilegal (EIYM)
+    const deforestationZones = [
+      {
+        name: 'Arco Norte Chiribiquete (Tunia – Ajajú – Cachicamo)',
+        dept: 'Guaviare / Caquetá / Meta',
+        hectares: '15.941 ha (Guaviare) + frente norte Chiribiquete',
+        drivers: 'Vías ilegales de penetración (Tunia–Ajajú y Cachicamo–Tunia), praderización para ganadería extensiva, acaparamiento de tierras y corredores logísticos de GAO-r.',
+        coords: [[2.15, -73.45], [2.25, -72.55], [1.95, -71.85], [1.45, -71.95], [1.55, -72.75], [1.75, -73.45]]
+      },
+      {
+        name: 'Frente Sabanas del Yarí – Cartagena del Chairá',
+        dept: 'Caquetá',
+        hectares: '30.414 ha deforestadas (Dpto. Caquetá - SMByC)',
+        drivers: 'Principal foco de pérdida de bosque en la Amazonía. Expansión de frontera agropecuaria, cultivos ilícitos (8.537 ha) y eje hacia el río Caguán y borde occidental de Chiribiquete.',
+        coords: [[1.55, -74.65], [1.65, -73.85], [0.95, -73.75], [0.45, -74.15], [0.55, -74.85], [1.05, -74.95]]
+      },
+      {
+        name: 'Arco La Macarena – Mapiripán (Tinigua)',
+        dept: 'Meta',
+        hectares: '22.554 ha deforestadas (Dpto. Meta - SMByC)',
+        drivers: 'Tala y quema sobre la bisagra Andino-Amazónica (PNN Tinigua y Sierra de la Macarena) y eje del río Guaviare hacia Mapiripán.',
+        coords: [[2.75, -74.15], [2.85, -73.35], [2.65, -72.25], [2.25, -72.35], [2.15, -73.45], [2.25, -74.05]]
+      },
+      {
+        name: 'Frente Putumayo – Mecaya – Sencella',
+        dept: 'Putumayo',
+        hectares: '8.961 ha deforestadas (Dpto. Putumayo - SMByC)',
+        drivers: 'Deforestación asociada a cultivos de coca y corredores fluviales ilegales entre los ríos Caquetá y Putumayo (disputa Comandos de Frontera vs. Carolina Ramírez).',
+        coords: [[0.45, -75.85], [0.35, -74.95], [-0.25, -74.85], [-0.35, -75.65]]
+      },
+      {
+        name: 'Núcleo Miraflores – Alto Vaupés / Inírida',
+        dept: 'Guaviare / Vaupés',
+        hectares: '2.072 ha (Vaupés) + frente sur Guaviare',
+        drivers: 'Apertura de trochas y tala en el interfluvio Vaupés–Inírida, afectando la RNN Nukak.',
+        coords: [[1.65, -72.15], [1.75, -71.35], [1.25, -71.25], [1.15, -71.95]]
+      }
+    ];
+
+    const illegalMiningHotspots = [
+      { name: 'Foco EIYM Bajo Caquetá – La Pedrera / Córdoba', mineral: 'Oro Aluvial (Dragas y Balsas)', lat: -1.25, lng: -69.72, impact: 'Operación de dragas brasileñas y locales sobre el río Caquetá y quebradas colindantes con PNN Yaigojé Apaporis y PNN Río Puré. Lavado transfronterizo de oro hacia Brasil.' },
+      { name: 'Foco EIYM Río Apaporis (Yaigojé Apaporis)', mineral: 'Oro Aluvial', lat: -0.78, lng: -70.35, impact: 'Extracción ilícita en el corredor fluvial del Apaporis, con vertimiento de mercurio y afectación directa a resguardos indígenas.' },
+      { name: 'Foco EIYM Río Puré – Frontera Brasil', mineral: 'Oro Aluvial', lat: -1.95, lng: -69.85, impact: 'Incursiones de minería ilegal en afluentes del río Puré, amenazando pueblos indígenas en aislamiento voluntario.' },
+      { name: 'Foco EIYM Araracuara – Medio Río Caquetá', mineral: 'Oro Aluvial', lat: -0.68, lng: -72.15, impact: 'Actividad de dragado artesanal y mecanizado aguas abajo de los raudales de Araracuara, articulada con economías ilícitas regionales.' },
+      { name: 'Foco EIYM Tarapacá – Río Cotuhé / Putumayo', mineral: 'Oro Aluvial (Dragas)', lat: -2.85, lng: -69.82, impact: 'Nodo crítico en el Trapecio Amazónico donde convergen dragas de gran capacidad en el eje fronterizo Colombia–Perú–Brasil.' },
+      { name: 'Foco EIYM RNN Puinawai – Cuenca Río Inírida', mineral: 'Oro y Coltán / Tierras Raras', lat: 2.35, lng: -69.15, impact: 'Extracción ilegal de oro y minerales estratégicos (coltán/casiterita) en el Escudo Guayanés al sur de Barrancominas, con rutas hacia el Meta y Arco Minero.' },
+      { name: 'Corredor Minero Río Guaviare – Barrancominas / Mapiripana', mineral: 'Oro y Tráfico de Coltán', lat: 3.38, lng: -70.15, impact: 'Punto de acopio y tránsito fluvial de minerales extraídos en Guainía y Vichada hacia el interior del país.' },
+      { name: 'Foco EIYM San Felipe – Río Negro / Guainía', mineral: 'Oro y Tierras Raras', lat: 1.92, lng: -67.08, impact: 'Corredor trifronterizo (Colombia–Venezuela–Brasil) vinculado al Arco Minero del Orinoco y redes de GAO-r / ELN.' },
+      { name: 'Foco EIYM Serranía de Taraira', mineral: 'Oro Filoneano y Aluvial', lat: -0.55, lng: -69.65, impact: 'Enclave minero histórico en el suroriente del Vaupés, cerca de la frontera con Brasil y el norte de La Pedrera.' }
+    ];
+
+    let currentThreatFilter = 'all';
+
+    // Datos Capa 4: Parques Nacionales Naturales
+    const parksData = [
+      {
+        name: 'PNN Serranía de Chiribiquete',
+        dept: 'Caquetá y Guaviare',
+        area: '4.268.095 ha',
+        priority: true,
+        nearestBase: 'Araracuara (lindero sur inmediato)',
+        analysis: 'Eje de conexión entre Orinoquía y Amazonía. Patrimonio Mixto de la Humanidad. Enfrenta fuertes presiones por arcos de deforestación, ganadería extensiva y corredores de movilidad de GAO-r en sus bordes norte y occidental.',
+        coords: [[1.65, -73.35], [1.85, -72.65], [1.45, -72.15], [0.95, -72.05], [0.35, -71.85], [-0.35, -71.95], [-0.55, -72.45], [-0.45, -73.25], [0.25, -73.85], [0.95, -73.75]]
+      },
+      {
+        name: 'PNN Yaigojé Apaporis',
+        dept: 'Amazonas y Vaupés',
+        area: '1.056.023 ha',
+        priority: true,
+        nearestBase: 'La Pedrera (lindero sureste)',
+        analysis: 'Territorio ancestral y resguardo indígena en el bajo río Apaporis, colindante con La Pedrera. Área crítica para la conservación biocultural y control frente a extracción ilícita de oro (EIYM).',
+        coords: [[-0.25, -71.15], [-0.45, -70.45], [-0.75, -69.65], [-1.25, -69.55], [-1.30, -69.95], [-1.05, -70.65], [-0.65, -71.25]]
+      },
+      {
+        name: 'RNN Puinawai',
+        dept: 'Guainía',
+        area: '1.092.500 ha',
+        priority: true,
+        nearestBase: 'Barrancominas (~135 km al sur)',
+        analysis: 'Reserva Nacional Natural estratégica del Escudo Guayanés. Amenazada por minería ilegal de oro y tierras raras/coltán en las cuencas de los ríos Inírida y Cuiarí.',
+        coords: [[2.65, -69.65], [2.75, -68.85], [2.15, -68.55], [1.75, -68.85], [1.75, -69.55], [2.15, -69.85]]
+      },
+      {
+        name: 'RNN Nukak',
+        dept: 'Guaviare y Vaupés',
+        area: '855.000 ha',
+        priority: true,
+        nearestBase: 'Barrancominas (~150 km al suroeste)',
+        analysis: 'Corredor selvático entre los ríos Guaviare e Inírida. Territorio del pueblo Nukak en aislamiento/contacto inicial; sufre presiones por deforestación y cultivos ilícitos en el sector de Miraflores.',
+        coords: [[2.55, -71.55], [2.65, -70.75], [2.15, -70.55], [1.75, -70.95], [1.95, -71.55]]
+      },
+      {
+        name: 'PNN Cahuinarí',
+        dept: 'Amazonas',
+        area: '575.500 ha',
+        priority: true,
+        nearestBase: 'Araracuara (~140 km al sureste)',
+        analysis: 'Ubicado entre los ríos Caquetá y Cahuinarí. Refugio clave de fauna amazónica (charapa, caimán negro) y resguardo de comunidades miraña y bora.',
+        coords: [[-0.95, -71.35], [-1.05, -70.65], [-1.55, -70.55], [-1.65, -71.25]]
+      },
+      {
+        name: 'PNN Río Puré',
+        dept: 'Amazonas',
+        area: '999.880 ha',
+        priority: true,
+        nearestBase: 'La Pedrera (~75 km al sur)',
+        analysis: 'Protege el interfluvio Caquetá–Putumayo en la frontera con Brasil y resguarda pueblos indígenas en aislamiento voluntario (Yurí / Carabayo).',
+        coords: [[-1.55, -70.45], [-1.65, -69.45], [-2.35, -69.45], [-2.35, -70.35]]
+      },
+      {
+        name: 'PNN El Tuparro',
+        dept: 'Vichada',
+        area: '548.000 ha',
+        priority: false,
+        nearestBase: 'Barrancominas (~215 km al noreste)',
+        analysis: 'Reserva de la Biosfera en la altillanura del Vichada, delimitada por los ríos Tomo, Tuparro y Orinoco.',
+        coords: [[5.45, -69.15], [5.50, -67.85], [5.05, -67.85], [5.05, -69.05]]
+      },
+      {
+        name: 'PNN Sierra de la Macarena y Tinigua',
+        dept: 'Meta',
+        area: '831.000 ha (conjunto)',
+        priority: false,
+        nearestBase: 'Nodo de articulación norte',
+        analysis: 'Bisagra ecológica entre los Andes, la Orinoquía y la Amazonía. Área de alta prioridad contra la deforestación y el acaparamiento de tierras.',
+        coords: [[3.15, -74.25], [3.20, -73.65], [2.35, -73.55], [2.25, -74.15]]
+      },
+      {
+        name: 'PNN La Paya',
+        dept: 'Putumayo',
+        area: '422.000 ha',
+        priority: false,
+        nearestBase: 'Eje fluvial Putumayo - Caquetá',
+        analysis: 'Área protegida binacional (corredor con Cuyabeno en Ecuador y Güeppí en Perú) sobre el río Putumayo, presionada por cultivos ilícitos.',
+        coords: [[0.05, -75.45], [-0.15, -74.75], [-0.45, -74.85], [-0.25, -75.55]]
+      },
+      {
+        name: 'PNN Amacayacu',
+        dept: 'Amazonas',
+        area: '293.500 ha',
+        priority: false,
+        nearestBase: 'Trapecio Amazónico (Leticia)',
+        analysis: 'Parque emblemático del Trapecio Amazónico entre los ríos Amazonas y Cotuhé.',
+        coords: [[-3.15, -70.35], [-3.15, -69.95], [-3.75, -69.95], [-3.75, -70.35]]
+      }
+    ];
+
+    let currentParkFilter = 'all';
+
+    // Curva orgánica spline Catmull-Rom + micro-meandros para ríos
+    function buildOrganicRiverCurve(rawCoords, subdivisions = 10, meanderAmp = 0.018) {
+      if (rawCoords.length < 2) return rawCoords;
+      const pts = [rawCoords[0], ...rawCoords, rawCoords[rawCoords.length - 1]];
+      const smooth = [];
+
+      for (let i = 1; i < pts.length - 2; i++) {
+        const p0 = pts[i - 1];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[i + 2];
+
+        const dLat = p2[0] - p1[0];
+        const dLng = p2[1] - p1[1];
+        const segLen = Math.hypot(dLat, dLng) || 1;
+        const perpLat = -dLng / segLen;
+        const perpLng = dLat / segLen;
+
+        for (let step = 0; step < subdivisions; step++) {
+          const t = step / subdivisions;
+          const t2 = t * t;
+          const t3 = t2 * t;
+
+          let lat = 0.5 * (
+            (2 * p1[0]) +
+            (-p0[0] + p2[0]) * t +
+            (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 +
+            (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3
+          );
+          let lng = 0.5 * (
+            (2 * p1[1]) +
+            (-p0[1] + p2[1]) * t +
+            (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 +
+            (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3
+          );
+
+          const envelope = Math.sin(Math.PI * t);
+          const wave = Math.sin(2 * Math.PI * t + i * 1.7) * meanderAmp * envelope * Math.min(1.5, segLen * 3);
+          lat += perpLat * wave;
+          lng += perpLng * wave;
+
+          smooth.push([lat, lng]);
+        }
+      }
+      smooth.push(rawCoords[rawCoords.length - 1]);
+      return smooth;
+    }
+
+    // Datos Capa 3: Red Hidrográfica
+    const riversData = [
+      {
+        name: 'Río Caquetá (Japurá)',
+        basin: 'amazonas',
+        tier: 'primary',
+        color: '#22d3ee',
+        weight: 4.5,
+        navigability: 'Eje fluvial vital del sur. Conecta Araracuara y La Pedrera hasta la frontera con Brasil. Presenta raudales críticos en Araracuara y Córdoba.',
+        coords: [
+          [1.22, -76.55], [1.08, -76.34], [1.14, -76.12], [0.95, -75.94], [0.88, -75.74],
+          [0.94, -75.56], [0.74, -75.42], [0.64, -75.24], [0.68, -75.04], [0.47, -74.90],
+          [0.35, -74.72], [0.39, -74.52], [0.15, -74.38], [0.02, -74.20], [0.06, -74.00],
+          [-0.16, -73.84], [-0.26, -73.62], [-0.21, -73.42], [-0.38, -73.22], [-0.46, -72.98],
+          [-0.41, -72.78], [-0.56, -72.58], [-0.6169, -72.3822], [-0.71, -72.16], [-0.66, -71.94],
+          [-0.81, -71.74], [-0.88, -71.50], [-0.82, -71.28], [-0.99, -71.06], [-1.06, -70.82],
+          [-1.00, -70.58], [-1.16, -70.34], [-1.23, -70.10], [-1.18, -69.88], [-1.30, -69.70],
+          [-1.3286, -69.5797], [-1.41, -69.40], [-1.46, -69.22]
+        ]
+      },
+      {
+        name: 'Río Guaviare',
+        basin: 'orinoco',
+        tier: 'primary',
+        color: '#22d3ee',
+        weight: 4.5,
+        navigability: 'Principal arteria fluvial de Barrancominas. Articula el transporte de carga pesada y combustible entre San José del Guaviare, Mapiripán y el río Orinoco.',
+        coords: [
+          [2.58, -72.64], [2.66, -72.44], [2.54, -72.26], [2.68, -72.08], [2.75, -71.90],
+          [2.64, -71.72], [2.80, -71.54], [2.89, -71.36], [2.79, -71.18], [2.96, -71.00],
+          [3.08, -70.84], [3.02, -70.64], [3.22, -70.46], [3.35, -70.30], [3.29, -70.12],
+          [3.46, -69.96], [3.4908, -69.8071], [3.58, -69.60], [3.66, -69.42], [3.56, -69.22],
+          [3.72, -69.02], [3.80, -68.82], [3.70, -68.62], [3.86, -68.42], [3.95, -68.22],
+          [3.88, -68.02], [4.01, -67.84], [4.04, -67.71]
+        ]
+      },
+      {
+        name: 'Río Apaporis',
+        basin: 'amazonas',
+        tier: 'secondary',
+        color: '#38bdf8',
+        weight: 3,
+        navigability: 'Corredor selvático que bordea el PNN Chiribiquete y el PNN Yaigojé Apaporis, desembocando en el río Caquetá cerca de La Pedrera.',
+        coords: [
+          [1.25, -72.45], [1.10, -72.30], [1.16, -72.12], [0.96, -71.98], [0.84, -71.80],
+          [0.89, -71.62], [0.64, -71.52], [0.46, -71.38], [0.51, -71.18], [0.24, -71.12],
+          [0.06, -70.98], [0.11, -70.78], [-0.18, -70.68], [-0.36, -70.52], [-0.31, -70.32],
+          [-0.58, -70.20], [-0.78, -70.04], [-0.73, -69.84], [-0.98, -69.74], [-1.16, -69.62],
+          [-1.30, -69.55]
+        ]
+      },
+      {
+        name: 'Río Inírida',
+        basin: 'orinoco',
+        tier: 'secondary',
+        color: '#38bdf8',
+        weight: 3,
+        navigability: 'Conecta el sur de Guainía con el río Guaviare en Puerto Inírida. Corredor clave para control territorial y minería ilegal.',
+        coords: [
+          [2.15, -71.20], [2.25, -70.96], [2.18, -70.74], [2.38, -70.50], [2.48, -70.26],
+          [2.41, -70.02], [2.66, -69.78], [2.80, -69.54], [2.74, -69.30], [3.05, -69.06],
+          [3.21, -68.82], [3.15, -68.58], [3.48, -68.36], [3.66, -68.14], [3.74, -67.96],
+          [3.92, -67.82], [4.02, -67.72]
+        ]
+      },
+      {
+        name: 'Río Vaupés',
+        basin: 'amazonas',
+        tier: 'secondary',
+        color: '#38bdf8',
+        weight: 3,
+        navigability: 'Eje transversal de conectividad en el departamento del Vaupés (Carurú - Mitú) hacia la cuenca del río Negro en Brasil.',
+        coords: [
+          [1.65, -72.10], [1.54, -71.88], [1.60, -71.66], [1.41, -71.44], [1.34, -71.22],
+          [1.40, -70.98], [1.23, -70.74], [1.20, -70.48], [1.28, -70.23], [1.14, -70.02],
+          [1.20, -69.82], [1.00, -69.62], [0.91, -69.38], [0.85, -69.15]
+        ]
+      },
+      {
+        name: 'Río Putumayo',
+        basin: 'amazonas',
+        tier: 'primary',
+        color: '#22d3ee',
+        weight: 4,
+        navigability: 'Eje fronterizo sur (Puerto Asís - Puerto Leguízamo - El Encanto - Tarapacá), corredor estratégico binacional con Perú y Brasil.',
+        coords: [
+          [0.50, -76.50], [0.35, -76.26], [0.41, -76.02], [0.14, -75.76], [0.01, -75.50],
+          [0.07, -75.24], [-0.20, -74.98], [-0.28, -74.74], [-0.22, -74.48], [-0.51, -74.22],
+          [-0.67, -73.96], [-0.61, -73.70], [-0.96, -73.44], [-1.14, -73.18], [-1.08, -72.90],
+          [-1.46, -72.62], [-1.66, -72.34], [-1.60, -72.06], [-2.00, -71.76], [-2.20, -71.46],
+          [-2.14, -71.16], [-2.51, -70.84], [-2.68, -70.50], [-2.62, -70.14], [-2.88, -69.75]
+        ]
+      },
+      {
+        name: 'Río Orinoco (Eje Fronterizo)',
+        basin: 'orinoco',
+        tier: 'primary',
+        color: '#22d3ee',
+        weight: 4.5,
+        navigability: 'Frontera fluvial con Venezuela donde desembocan los ríos Guaviare, Vichada y Meta (PFA Amanavén - San Fernando de Atabapo - Puerto Carreño).',
+        coords: [
+          [3.15, -67.55], [3.32, -67.62], [3.48, -67.56], [3.66, -67.65], [3.85, -67.60],
+          [4.04, -67.71], [4.22, -67.79], [4.40, -67.73], [4.58, -67.83], [4.76, -67.77],
+          [4.95, -67.84], [5.14, -67.75], [5.32, -67.78], [5.50, -67.64], [5.68, -67.66],
+          [5.85, -67.52], [6.02, -67.54], [6.18, -67.48]
+        ]
+      },
+      {
+        name: 'Río Caguán y Orteguaza',
+        basin: 'amazonas',
+        tier: 'secondary',
+        color: '#38bdf8',
+        weight: 2.5,
+        navigability: 'Afluentes norte del río Caquetá que conectan el piedemonte (Florencia, Tres Esquinas, Cartagena del Chairá) con la selva profunda.',
+        coords: [
+          [1.60, -75.60], [1.44, -75.48], [1.28, -75.52], [1.12, -75.32], [0.96, -75.36],
+          [0.80, -75.20], [0.66, -75.18], [0.52, -74.98], [0.38, -74.92], [0.24, -74.70],
+          [0.10, -74.62], [-0.04, -74.38], [-0.14, -74.26]
+        ]
+      }
+    ];
+
+    let currentBasinFilter = 'all';
+
+    // Constantes de conversión
+    const NM_TO_METERS = 1852;
+    const SM_TO_METERS = 1609.344;
+    let currentMileType = 'NM';
+
+    // Renderizar Capa 1 (Marcadores + Lista lateral en cristal)
+    const markersMap = {};
+    const listContainer = document.getElementById('locationsList');
+
+    locations.forEach(loc => {
+      const icon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="pulse-marker" style="width:24px;height:24px;"><div class="pulse-dot"></div></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const popupContent = `
+        <div class="w-full p-0.5">
+          <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+            <div>
+              <h3 class="font-bold text-sm sm:text-base text-white">${loc.name}</h3>
+              <span class="text-xs text-white/60">${loc.dept}</span>
+            </div>
+            <span class="bg-red-500/25 text-red-200 border border-red-400/45 text-xs font-mono font-bold px-2.5 py-0.5 rounded-full">${loc.oaci}</span>
+          </div>
+          <div class="space-y-1.5 text-xs">
+            <div><span class="text-white/55">Coordenadas:</span> <span class="font-mono text-amber-300">${loc.coordsText}</span></div>
+            <div><span class="text-white/55">Unidades:</span> <span class="text-white font-medium">${loc.unit}</span></div>
+            <div><span class="text-white/55">Demografía:</span> <span class="text-white/90">${loc.pop}</span></div>
+            <div><span class="text-white/55">Economía / Pista:</span> <span class="text-white/80">${loc.econ}</span></div>
+            <div class="pt-1.5 border-t border-white/15 text-[11px] text-amber-200"><span class="text-white/55">Diagnóstico Terreno:</span> ${loc.fieldAudit}</div>
+          </div>
+        </div>
+      `;
+
+      const marker = L.marker([loc.lat, loc.lng], { icon })
+        .bindPopup(popupContent)
+        .bindTooltip(`<strong>${loc.name}</strong> (${loc.oaci})`, {
+          permanent: true,
+          direction: 'top',
+          offset: [0, -14],
+          className: 'distance-label'
+        })
+        .addTo(layer1Group);
+
+      markersMap[loc.id] = marker;
+
+      const btn = document.createElement('button');
+      btn.className = 'w-full text-left px-3 py-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.14] border border-white/15 transition flex items-center justify-between group active:scale-[0.99]';
+      btn.innerHTML = `
+        <div>
+          <div class="text-xs font-semibold text-white group-hover:text-amber-300 transition">${loc.name} <span class="text-[10px] font-mono text-white/55">(${loc.oaci})</span></div>
+          <div class="text-[11px] text-white/55">${loc.dept}</div>
+        </div>
+        <span class="text-xs text-white/45 group-hover:text-white transition">Ver ›</span>
+      `;
+      btn.onclick = () => {
+        closeSidebarOnMobile();
+        map.flyTo([loc.lat, loc.lng], 8, { duration: 1.2 });
+        marker.openPopup();
+      };
+      listContainer.appendChild(btn);
+    });
+
+    // Renderizar Capa 3 (Red Hidrográfica)
+    function renderLayer3() {
+      layer3Group.clearLayers();
+      const showLabels = document.getElementById('toggleRiverLabels').checked;
+
+      riversData.forEach(river => {
+        if (currentBasinFilter !== 'all' && river.basin !== currentBasinFilter) return;
+
+        const organicCoords = buildOrganicRiverCurve(river.coords, 10, river.tier === 'primary' ? 0.022 : 0.016);
+
+        L.polyline(organicCoords, {
+          color: '#0891b2',
+          weight: river.weight + 4,
+          opacity: 0.35,
+          smoothFactor: 0.5,
+          lineCap: 'round',
+          lineJoin: 'round',
+          interactive: false
+        }).addTo(layer3Group);
+
+        L.polyline(organicCoords, {
+          color: river.color,
+          weight: river.weight,
+          opacity: 0.92,
+          dashArray: river.tier === 'secondary' ? '6, 5' : null,
+          smoothFactor: 0.5,
+          lineCap: 'round',
+          lineJoin: 'round'
+        })
+        .bindPopup(`
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+              <strong class="text-cyan-300 text-sm">🌊 ${river.name}</strong>
+              <span class="bg-cyan-400/20 text-cyan-200 border border-cyan-300/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                ${river.basin === 'amazonas' ? 'Cuenca Amazonas' : 'Cuenca Orinoco'}
+              </span>
+            </div>
+            <p class="text-white/85 leading-relaxed">${river.navigability}</p>
+          </div>
+        `)
+        .addTo(layer3Group);
+
+        if (showLabels) {
+          const midIdx = Math.floor(organicCoords.length / 2);
+          const midPt = organicCoords[midIdx];
+          L.marker(midPt, {
+            icon: L.divIcon({
+              className: 'river-label-icon',
+              html: `<div style="background:rgba(8,51,68,0.82);backdrop-filter:blur(10px);border:1px solid rgba(103,232,249,0.55);color:#cffafe;padding:1.5px 7px;border-radius:9999px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,0.45);">🌊 ${river.name}</div>`,
+              iconSize: [120, 18],
+              iconAnchor: [60, 9]
+            }),
+            interactive: false
+          }).addTo(layer3Group);
+        }
+      });
+    }
+
+    function setBasinFilter(basin) {
+      currentBasinFilter = basin;
+      ['all', 'amazonas', 'orinoco'].forEach(b => {
+        const btn = document.getElementById('basin-' + b);
+        if (b === basin) {
+          btn.className = 'py-1 px-1.5 text-[11px] font-semibold bg-cyan-400 text-slate-950 seg-active-pill transition';
+        } else {
+          btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition';
+        }
+      });
+      renderLayer3();
+    }
+
+    // Renderizar Capa 4 (Parques Nacionales Naturales)
+    function renderLayer4() {
+      layer4Group.clearLayers();
+      const showLabels = document.getElementById('toggleParkLabels').checked;
+
+      parksData.forEach(park => {
+        if (currentParkFilter === 'priority' && !park.priority) return;
+
+        const polygon = L.polygon(park.coords, {
+          color: park.priority ? '#34d399' : '#10b981',
+          weight: park.priority ? 2.2 : 1.6,
+          fillColor: '#059669',
+          fillOpacity: park.priority ? 0.24 : 0.16
+        })
+        .bindPopup(`
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+              <div>
+                <h3 class="font-bold text-sm text-emerald-300">🌳 ${park.name}</h3>
+                <span class="text-[11px] text-white/60">${park.dept}</span>
+              </div>
+              <span class="bg-emerald-400/20 text-emerald-200 border border-emerald-300/40 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                PNN / RNN
+              </span>
+            </div>
+            <div class="space-y-1.5">
+              <div><span class="text-white/55">Extensión:</span> <strong class="font-mono text-white">${park.area}</strong></div>
+              <div><span class="text-white/55">Relación Base:</span> <span class="text-amber-200 font-medium">${park.nearestBase}</span></div>
+              <p class="text-white/85 leading-relaxed pt-1.5 border-t border-white/15">${park.analysis}</p>
+            </div>
+          </div>
+        `)
+        .addTo(layer4Group);
+
+        if (showLabels) {
+          const center = polygon.getBounds().getCenter();
+          L.marker(center, {
+            icon: L.divIcon({
+              className: 'park-label-icon',
+              html: `<div style="background:rgba(6,78,59,0.82);backdrop-filter:blur(10px);border:1px solid rgba(110,231,183,0.55);color:#d1fae5;padding:1.5px 7px;border-radius:9999px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,0.45);">🌳 ${park.name}</div>`,
+              iconSize: [145, 18],
+              iconAnchor: [72, 9]
+            }),
+            interactive: false
+          }).addTo(layer4Group);
+        }
+      });
+    }
+
+    function setParkFilter(filter) {
+      currentParkFilter = filter;
+      ['all', 'priority'].forEach(f => {
+        const btn = document.getElementById('park-' + f);
+        if (f === filter) {
+          btn.className = 'py-1 px-1.5 text-[11px] font-semibold bg-emerald-400 text-slate-950 seg-active-pill transition';
+        } else {
+          btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition';
+        }
+      });
+      renderLayer4();
+    }
+
+    // Renderizar Capa 5 (Deforestación y Minería Ilegal EIYM)
+    function renderLayer5() {
+      layer5Group.clearLayers();
+
+      if (currentThreatFilter === 'all' || currentThreatFilter === 'deforestation') {
+        deforestationZones.forEach(zone => {
+          L.polygon(zone.coords, {
+            color: '#fb7185',
+            weight: 2,
+            dashArray: '4, 4',
+            fillColor: '#e11d48',
+            fillOpacity: 0.28
+          })
+          .bindPopup(`
+            <div class="w-full p-0.5 text-xs">
+              <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+                <div>
+                  <h3 class="font-bold text-sm text-rose-300">🔥 ${zone.name}</h3>
+                  <span class="text-[11px] text-white/60">${zone.dept}</span>
+                </div>
+                <span class="bg-rose-500/25 text-rose-200 border border-rose-400/45 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  DEFORESTACIÓN
+                </span>
+              </div>
+              <div class="space-y-1.5">
+                <div><span class="text-white/55">Magnitud SMByC:</span> <strong class="text-rose-200">${zone.hectares}</strong></div>
+                <p class="text-white/85 leading-relaxed pt-1.5 border-t border-white/15">${zone.drivers}</p>
+              </div>
+            </div>
+          `)
+          .addTo(layer5Group);
+        });
+      }
+
+      if (currentThreatFilter === 'all' || currentThreatFilter === 'mining') {
+        illegalMiningHotspots.forEach(spot => {
+          const mineIcon = L.divIcon({
+            className: 'mining-diamond-icon',
+            html: `<div style="width:16px;height:16px;transform:rotate(45deg);background:#d946ef;border:2px solid #fdf4ff;box-shadow:0 0 12px rgba(217,70,239,0.9);"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+          });
+
+          L.marker([spot.lat, spot.lng], { icon: mineIcon })
+            .bindPopup(`
+              <div class="w-full p-0.5 text-xs">
+                <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+                  <div>
+                    <h3 class="font-bold text-sm text-fuchsia-300">⛏ ${spot.name}</h3>
+                    <span class="text-[11px] text-amber-200 font-semibold">${spot.mineral}</span>
+                  </div>
+                  <span class="bg-fuchsia-500/25 text-fuchsia-200 border border-fuchsia-400/45 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    EIYM
+                  </span>
+                </div>
+                <p class="text-white/85 leading-relaxed">${spot.impact}</p>
+              </div>
+            `)
+            .addTo(layer5Group);
+        });
+      }
+    }
+
+    function setThreatFilter(filter) {
+      currentThreatFilter = filter;
+      ['all', 'deforestation', 'mining'].forEach(f => {
+        const btn = document.getElementById('threat-' + f);
+        if (f === filter) {
+          btn.className = 'py-1 px-1.5 text-[11px] font-semibold bg-rose-500 text-white seg-active-pill transition';
+        } else {
+          btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition';
+        }
+      });
+      renderLayer5();
+    }
+
+    // Renderizar Capa 6 (Cultivos Ilícitos de Coca)
+    function renderLayer6() {
+      layer6Group.clearLayers();
+
+      cocaClusters.forEach(cluster => {
+        if (currentCocaFilter !== 'all' && cluster.region !== currentCocaFilter) return;
+
+        L.polygon(cluster.coords, {
+          color: '#a3e635',
+          weight: 2,
+          dashArray: '3, 5',
+          fillColor: '#65a30d',
+          fillOpacity: 0.28
+        })
+        .bindPopup(`
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+              <div>
+                <h3 class="font-bold text-sm text-lime-300">🌿 ${cluster.name}</h3>
+                <span class="text-[11px] text-white/60">${cluster.dept} • ${cluster.density}</span>
+              </div>
+              <span class="bg-lime-400/20 text-lime-200 border border-lime-300/40 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                COCA
+              </span>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex justify-between"><span class="text-white/55">GUDET 2025:</span> <span class="font-mono font-bold text-lime-200">${cluster.gudet2025}</span></div>
+              <div class="flex justify-between"><span class="text-white/55">SIMCI 2024:</span> <span class="font-mono text-white/90">${cluster.simci2024}</span></div>
+              <p class="text-white/85 leading-relaxed pt-1.5 border-t border-white/15">${cluster.analysis}</p>
+            </div>
+          </div>
+        `)
+        .addTo(layer6Group);
+      });
+    }
+
+    function setCocaFilter(filter) {
+      currentCocaFilter = filter;
+      ['all', 'amazonia', 'orinoquia'].forEach(f => {
+        const btn = document.getElementById('coca-' + f);
+        if (f === filter) {
+          btn.className = 'py-1 px-1.5 text-[11px] font-semibold bg-lime-400 text-slate-950 seg-active-pill transition';
+        } else {
+          btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition';
+        }
+      });
+      renderLayer6();
+    }
+
+    // Renderizar Capa 7 (Puestos Fluviales Avanzados)
+    function renderLayer7() {
+      layer7Group.clearLayers();
+      pfaPostsData.forEach(pfa => {
+        if (currentPfaFilter !== 'all' && pfa.category !== currentPfaFilter) return;
+
+        const isPriority = pfa.category === 'yurupari';
+        const pfaIcon = L.divIcon({
+          className: 'pfa-div-icon',
+          html: `<div style="width:20px;height:20px;background:${isPriority ? '#4f46e5' : '#1e3a8a'};border:2px solid #c7d2fe;border-radius:6px;box-shadow:0 0 10px rgba(99,102,241,0.85);display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:11px;font-weight:900;">⚓</div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        L.marker([pfa.lat, pfa.lng], { icon: pfaIcon })
+          .bindPopup(`
+            <div class="w-full p-0.5 text-xs">
+              <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+                <div>
+                  <h3 class="font-bold text-sm text-indigo-300">⚓ ${pfa.name}</h3>
+                  <span class="text-[11px] text-white/60">${pfa.river} • ${pfa.dept}</span>
+                </div>
+                <span class="bg-indigo-500/25 text-indigo-200 border border-indigo-400/45 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  ARC
+                </span>
+              </div>
+              <div class="space-y-1.5">
+                <div><span class="text-white/55">Unidad:</span> <span class="font-semibold text-white">${pfa.unit}</span></div>
+                <p class="text-white/85 leading-relaxed pt-1.5 border-t border-white/15">${pfa.detail}</p>
+              </div>
+            </div>
+          `)
+          .addTo(layer7Group);
+      });
+    }
+
+    function setPfaFilter(filter) {
+      currentPfaFilter = filter;
+      ['all', 'yurupari', 'frontera'].forEach(f => {
+        const btn = document.getElementById('pfa-' + f);
+        if (f === filter) {
+          btn.className = 'py-1 px-1.5 text-[11px] font-semibold bg-indigo-500 text-white seg-active-pill transition';
+        } else {
+          btn.className = 'py-1 px-1.5 rounded-lg text-[11px] font-medium text-white/65 hover:text-white transition';
+        }
+      });
+      renderLayer7();
+    }
+
+    // Renderizar Capa 8 (Red Vial Terrestre)
+    function renderLayer8() {
+      layer8Group.clearLayers();
+      terrestrialRoadsData.forEach(road => {
+        L.polyline(road.coords, {
+          color: '#0f172a',
+          weight: 5,
+          opacity: 0.85,
+          interactive: false
+        }).addTo(layer8Group);
+
+        L.polyline(road.coords, {
+          color: '#fb923c',
+          weight: 3,
+          opacity: 0.95,
+          dashArray: '8, 6'
+        })
+        .bindPopup(`
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-1.5">
+              <strong class="text-orange-300 text-sm">🛣 ${road.name}</strong>
+            </div>
+            <div class="space-y-1 text-white/85">
+              <div><span class="text-white/55">Longitud / Tipo:</span> <strong class="text-white">${road.km}</strong></div>
+              <div><span class="text-white/55">Estado:</span> ${road.status}</div>
+              <p class="text-white/70 text-[11px] pt-1.5 border-t border-white/15">${road.detail}</p>
+            </div>
+          </div>
+        `)
+        .addTo(layer8Group);
+      });
+    }
+
+    // Renderizar Capa 9 (Viabilidad de Aeródromos Regionales)
+    function renderLayer9() {
+      layer9Group.clearLayers();
+      const statusColors = {
+        viable: { bg: '#10b981', label: 'VIABLE' },
+        restricted: { bg: '#f59e0b', label: 'RESTRINGIDO' },
+        unviable: { bg: '#ef4444', label: 'NO VIABLE' }
+      };
+
+      regionalAerodromesViability.forEach(aero => {
+        if (currentAeroStatusFilter !== 'all' && aero.status !== currentAeroStatusFilter) return;
+        const st = statusColors[aero.status];
+
+        const aeroIcon = L.divIcon({
+          className: 'aero-viab-icon',
+          html: `<div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid ${st.bg};filter:drop-shadow(0 0 5px rgba(0,0,0,0.85));"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+
+        L.marker([aero.lat, aero.lng], { icon: aeroIcon })
+          .bindPopup(`
+            <div class="w-full p-0.5 text-xs">
+              <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+                <div>
+                  <h3 class="font-bold text-sm text-white">${aero.name}</h3>
+                  <span class="text-[11px] text-white/60">${aero.dept} • OACI: <strong class="font-mono text-white">${aero.oaci}</strong></span>
+                </div>
+                <span style="background:${st.bg}28;color:${st.bg};border:1px solid ${st.bg}77;" class="text-[9px] font-bold px-2 py-0.5 rounded-full">
+                  ${st.label}
+                </span>
+              </div>
+              <p class="text-white/85 leading-relaxed">${aero.obs}</p>
+            </div>
+          `)
+          .addTo(layer9Group);
+      });
+    }
+
+    function setAeroStatusFilter(status) {
+      currentAeroStatusFilter = status;
+      const activeClasses = {
+        all: 'py-1 px-1 text-[10px] font-semibold bg-teal-400 text-slate-950 seg-active-pill transition',
+        viable: 'py-1 px-1 text-[10px] font-semibold bg-emerald-400 text-slate-950 seg-active-pill transition',
+        restricted: 'py-1 px-1 text-[10px] font-semibold bg-amber-300 text-slate-950 seg-active-pill transition',
+        unviable: 'py-1 px-1 text-[10px] font-semibold bg-rose-500 text-white seg-active-pill transition'
+      };
+      const defaultClasses = {
+        all: 'py-1 px-1 rounded-lg text-[10px] font-medium text-white/65 hover:text-white transition',
+        viable: 'py-1 px-1 rounded-lg text-[10px] font-medium text-emerald-300 hover:bg-emerald-500/20 transition',
+        restricted: 'py-1 px-1 rounded-lg text-[10px] font-medium text-amber-200 hover:bg-amber-500/20 transition',
+        unviable: 'py-1 px-1 rounded-lg text-[10px] font-medium text-rose-300 hover:bg-rose-500/20 transition'
+      };
+      ['all', 'viable', 'restricted', 'unviable'].forEach(s => {
+        document.getElementById('aero-' + s).className = (s === status) ? activeClasses[s] : defaultClasses[s];
+      });
+      renderLayer9();
+    }
+
+    // Renderizar Capa 10 (Presencia de GAO y GAO-r)
+    function renderLayer10() {
+      layer10Group.clearLayers();
+      const showLabels = document.getElementById('toggleGaoLabels').checked;
+
+      const catPalette = {
+        gaor: { stroke: '#a855f7', fill: '#7e22ce', badgeBg: 'rgba(168,85,247,0.25)', badgeText: '#e9d5ff', symbol: '⬟' },
+        eln_sm: { stroke: '#f43f5e', fill: '#be123c', badgeBg: 'rgba(244,63,94,0.25)', badgeText: '#fecdd3', symbol: '★' },
+        cdg_dot: { stroke: '#f59e0b', fill: '#b45309', badgeBg: 'rgba(245,158,11,0.25)', badgeText: '#fde68a', symbol: '▲' }
+      };
+
+      gaoStructuresData.forEach(gao => {
+        if (currentGaoFilter !== 'all' && gao.category !== currentGaoFilter) return;
+        const pal = catPalette[gao.category];
+
+        const popupHtml = `
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+              <div>
+                <h3 class="font-bold text-sm" style="color:${pal.badgeText}">${pal.symbol} ${gao.name}</h3>
+                <span class="text-[11px] text-white/60">${gao.faction}</span>
+              </div>
+              <span style="background:${pal.badgeBg};color:${pal.badgeText};border:1px solid ${pal.stroke};" class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                AMENAZA
+              </span>
+            </div>
+            <div class="space-y-1.5">
+              <div><span class="text-white/55">Jurisdicción:</span> <span class="text-white font-medium">${gao.region}</span></div>
+              <div><span class="text-white/55">Nivel:</span> <span class="text-amber-200 font-semibold">${gao.threatLevel}</span></div>
+              <p class="text-white/85 leading-relaxed pt-1.5 border-t border-white/15">${gao.detail}</p>
+            </div>
+          </div>
+        `;
+
+        L.polygon(gao.zoneCoords, {
+          color: pal.stroke,
+          weight: 1.8,
+          dashArray: '6, 4',
+          fillColor: pal.fill,
+          fillOpacity: 0.16
+        }).bindPopup(popupHtml).addTo(layer10Group);
+
+        const gaoIcon = L.divIcon({
+          className: 'gao-threat-icon',
+          html: `<div style="width:22px;height:22px;background:${pal.fill};border:2px solid #ffffff;border-radius:9999px;box-shadow:0 0 14px ${pal.stroke};display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:11px;font-weight:900;">${pal.symbol}</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+
+        L.marker([gao.lat, gao.lng], { icon: gaoIcon })
+          .bindPopup(popupHtml)
+          .addTo(layer10Group);
+
+        if (showLabels) {
+          L.marker([gao.lat - 0.16, gao.lng], {
+            icon: L.divIcon({
+              className: 'gao-label-icon',
+              html: `<div style="background:rgba(30,16,53,0.82);backdrop-filter:blur(10px);border:1px solid ${pal.stroke};color:${pal.badgeText};padding:1.5px 7px;border-radius:9999px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,0.55);">${pal.symbol} ${gao.name}</div>`,
+              iconSize: [165, 18],
+              iconAnchor: [82, 9]
+            }),
+            interactive: false
+          }).addTo(layer10Group);
+        }
+      });
+    }
+
+    function setGaoFilter(filter) {
+      currentGaoFilter = filter;
+      const activeStyles = {
+        all: 'py-1 px-1 text-[10px] font-semibold bg-purple-500 text-white seg-active-pill transition',
+        gaor: 'py-1 px-1 text-[10px] font-semibold bg-purple-500 text-white seg-active-pill transition',
+        eln_sm: 'py-1 px-1 text-[10px] font-semibold bg-rose-500 text-white seg-active-pill transition',
+        cdg_dot: 'py-1 px-1 text-[10px] font-semibold bg-amber-300 text-slate-950 seg-active-pill transition'
+      };
+      const defaultStyles = {
+        all: 'py-1 px-1 rounded-lg text-[10px] font-medium text-white/65 hover:text-white transition',
+        gaor: 'py-1 px-1 rounded-lg text-[10px] font-medium text-purple-200 hover:bg-purple-500/20 transition',
+        eln_sm: 'py-1 px-1 rounded-lg text-[10px] font-medium text-rose-200 hover:bg-rose-500/20 transition',
+        cdg_dot: 'py-1 px-1 rounded-lg text-[10px] font-medium text-amber-200 hover:bg-amber-500/20 transition'
+      };
+      ['all', 'gaor', 'eln_sm', 'cdg_dot'].forEach(f => {
+        document.getElementById('gao-' + f).className = (f === filter) ? activeStyles[f] : defaultStyles[f];
+      });
+      renderLayer10();
+    }
+
+    // Datos Capa 11: Telecomunicaciones, Rango Cobertura Trunking RDM, Energía y Radioayudas
+    const commsNodesData = [
+      {
+        id: 'araracuara',
+        name: 'Nodo Telecom y Navegación Araracuara (SKAC)',
+        units: 'BATOT21 y BILAC50',
+        lat: -0.6169,
+        lng: -72.3822,
+        guaranteedRadiusM: 5000,
+        losRadiusM: 20000,
+        trunkingSpec: 'Repetidor Motorola GTR8000 ESS (mín. 3 canales, RF, antenas, líneas y protecciones • USD $180.000). Torre Claro ~80 m con espacio disponible desde 65 m + requerimiento de shelter/adecuación.',
+        coverageCaveat: 'Cobertura garantizada en Puesto de Mando y zonas despejadas (~5 km); alcance extendido en corredor fluvial (~20 km) sujeto a densidad de vegetación, geografía y pruebas de campo.',
+        satSpec: 'VSAT GEO institucional hacia RIC/Site Master Bogotá + estación satelital dedicada RDM (licencia 40 Mbps • $200 M COP) + orquestación SD-WAN con Starlink LEO (~$61 M COP) + telefonía IP.',
+        energySpec: 'Respaldo energético ($710,65 M est. / informe visita): banco baterías 1.000 Ah, rectificador 12.000 W, TBAC, inversor 48/110V, acometida 250 m, A/A 12.000 BTU, 2 pozos tierra y 2 plantas (conciliar con alternativa solar litio).',
+        navaidsSpec: 'Proyección FAC: Radioayudas de navegación aérea VOR/DME, LOC, GS y estación meteorológica automática AWOS.'
+      },
+      {
+        id: 'pedrera',
+        name: 'Nodo Telecom y Navegación La Pedrera (SKLP)',
+        units: 'BILAC50 / GAAMA',
+        lat: -1.3286,
+        lng: -69.5797,
+        guaranteedRadiusM: 5000,
+        losRadiusM: 20000,
+        trunkingSpec: 'Repetidor Motorola GTR8000 ESS (3 canales • USD $180.000). Torre existente requiere mantenimiento estructural, pararrayos y tres (3) pozos de puesta a tierra capacitivos.',
+        coverageCaveat: 'Cobertura garantizada en Puesto de Mando, pista y perímetro (~5 km); alcance sobre eje río Caquetá/Apaporis (~20 km) condicionado por vegetación selvática (requiere prueba en terreno).',
+        satSpec: 'Mantenimiento y cambio de componentes de estación satelital existente ($90 M COP) + orquestación SD-WAN integrando VSAT GEO institucional y enlace LEO Starlink (~$61 M COP).',
+        energySpec: 'Respaldo energético ($27 M COP): inversor 48/110V, aire acondicionado, puesta a tierra capacitiva (3 pozos) y cableado de protección.',
+        navaidsSpec: 'Proyección FAC: Radioayudas VOR/DME, LOC, GS y estación meteorológica automática AWOS.'
+      },
+      {
+        id: 'barrancominas',
+        name: 'Nodo Telecom y Navegación Barrancominas (SKBM)',
+        units: 'BIPIN45 y PFA52 (Base El Galante)',
+        lat: 3.49084,
+        lng: -69.80716,
+        guaranteedRadiusM: 5000,
+        losRadiusM: 22000,
+        trunkingSpec: 'Proyección repetición RDM troncalizada (LOA VGY • $0 proyectado en LOA). Requiere reubicar shelter y torre (~80 m autosoportada/riendada) a sitio más seguro para proteger operación.',
+        coverageCaveat: 'Cobertura efectiva limitada al Puesto de Mando y sectores con menor vegetación (~5 km garantizados; ~22 km potenciales sobre eje río Guaviare). Pendiente configuración aprobada y pruebas de campo.',
+        satSpec: 'Estación VSAT GEO institucional existente + mantenimiento/cambio de componentes satelitales ($60 M COP) + solución SD-WAN GEO/LEO Starlink (~$61 M COP).',
+        energySpec: 'Respaldo energético ($356,6 M COP): banco baterías 48V/1.000 Ah, inversor, planta solar con rack y baterías de litio (mín. 800 Ah), A/A, extractor, rectificador y puesta a tierra.',
+        navaidsSpec: 'Proyección FAC: Radioayudas VOR/DME, LOC, GS y estación meteorológica automática AWOS.'
+      }
+    ];
+
+    let currentCommsFilter = 'all';
+
+    function renderLayer11() {
+      layer11Group.clearLayers();
+      const showRings = document.getElementById('toggleTrunkingRings').checked;
+
+      commsNodesData.forEach(node => {
+        const popupHtml = `
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+              <div>
+                <h3 class="font-bold text-sm text-sky-300">📡 ${node.name}</h3>
+                <span class="text-[11px] text-white/60">Unidades: ${node.units}</span>
+              </div>
+              <span class="bg-sky-400/20 text-sky-200 border border-sky-300/40 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                CECCO/FAC
+              </span>
+            </div>
+            <div class="space-y-1.5 max-h-52 sm:max-h-60 overflow-y-auto pr-1">
+              <div><span class="text-sky-200 font-semibold">📻 Red Trunking RDM:</span> <span class="text-white/90">${node.trunkingSpec}</span></div>
+              <div class="bg-sky-400/10 border border-sky-300/30 rounded-xl p-2 text-[11px] text-cyan-100">
+                <strong>Rango Cobertura:</strong> ${node.coverageCaveat}
+              </div>
+              <div><span class="text-indigo-200 font-semibold">🛰 Satelital / SD-WAN:</span> <span class="text-white/85">${node.satSpec}</span></div>
+              <div><span class="text-emerald-200 font-semibold">⚡ Energía:</span> <span class="text-white/85">${node.energySpec}</span></div>
+              <div><span class="text-amber-200 font-semibold">🧭 Radioayudas / Met:</span> <span class="text-white/85">${node.navaidsSpec}</span></div>
+            </div>
+          </div>
+        `;
+
+        if (showRings && (currentCommsFilter === 'all' || currentCommsFilter === 'trunking')) {
+          L.circle([node.lat, node.lng], {
+            radius: node.losRadiusM,
+            color: '#38bdf8',
+            weight: 1.8,
+            dashArray: '6, 5',
+            fillColor: '#0284c7',
+            fillOpacity: 0.08
+          }).bindPopup(popupHtml).addTo(layer11Group);
+
+          L.circle([node.lat, node.lng], {
+            radius: node.guaranteedRadiusM,
+            color: '#7dd3fc',
+            weight: 2.2,
+            fillColor: '#38bdf8',
+            fillOpacity: 0.24
+          }).bindPopup(popupHtml).addTo(layer11Group);
+
+          const labelPt = destinationPoint(node.lat, node.lng, node.losRadiusM, 135);
+          L.marker(labelPt, {
+            icon: L.divIcon({
+              className: 'rdm-range-label',
+              html: `<div style="background:rgba(12,74,110,0.82);backdrop-filter:blur(10px);border:1px solid rgba(125,211,252,0.6);color:#e0f2fe;padding:1.5px 7px;border-radius:9999px;font-size:9px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,0.45);">📻 RDM: 5 km base / ${(node.losRadiusM/1000).toFixed(0)} km LOS</div>`,
+              iconSize: [130, 16],
+              iconAnchor: [65, 8]
+            }),
+            interactive: false
+          }).addTo(layer11Group);
+        }
+
+        const badgeColor = currentCommsFilter === 'navaids' ? '#f59e0b' : (currentCommsFilter === 'sat' ? '#6366f1' : '#0ea5e9');
+        const badgeSymbol = currentCommsFilter === 'navaids' ? '🧭' : (currentCommsFilter === 'sat' ? '🛰' : '📡');
+
+        const commsIcon = L.divIcon({
+          className: 'comms-node-icon',
+          html: `<div style="width:22px;height:22px;background:${badgeColor};border:2px solid #ffffff;border-radius:8px;box-shadow:0 0 12px ${badgeColor};display:flex;align-items:center;justify-content:center;font-size:11px;">${badgeSymbol}</div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+
+        L.marker([node.lat + 0.035, node.lng + 0.035], { icon: commsIcon })
+          .bindPopup(popupHtml)
+          .addTo(layer11Group);
+      });
+    }
+
+    function setCommsFilter(filter) {
+      currentCommsFilter = filter;
+      const activeStyles = {
+        all: 'py-1 px-1 text-[10px] font-semibold bg-sky-400 text-slate-950 seg-active-pill transition',
+        trunking: 'py-1 px-1 text-[10px] font-semibold bg-sky-400 text-slate-950 seg-active-pill transition',
+        sat: 'py-1 px-1 text-[10px] font-semibold bg-indigo-500 text-white seg-active-pill transition',
+        navaids: 'py-1 px-1 text-[10px] font-semibold bg-amber-300 text-slate-950 seg-active-pill transition'
+      };
+      const defaultStyles = {
+        all: 'py-1 px-1 rounded-lg text-[10px] font-medium text-white/65 hover:text-white transition',
+        trunking: 'py-1 px-1 rounded-lg text-[10px] font-medium text-sky-200 hover:bg-sky-500/20 transition',
+        sat: 'py-1 px-1 rounded-lg text-[10px] font-medium text-indigo-200 hover:bg-indigo-500/20 transition',
+        navaids: 'py-1 px-1 rounded-lg text-[10px] font-medium text-amber-200 hover:bg-amber-500/20 transition'
+      };
+      ['all', 'trunking', 'sat', 'navaids'].forEach(f => {
+        document.getElementById('comms-' + f).className = (f === filter) ? activeStyles[f] : defaultStyles[f];
+      });
+      renderLayer11();
+    }
+
+    // Datos Capa 12: Arquitectura de Inversión por Fuerza (2027-2035)
+    const investmentNodesData = [
+      {
+        name: 'Inversión Integral — Araracuara (Caquetá)',
+        lat: -0.6169,
+        lng: -72.3822,
+        totalSummary: 'EJC $18.830 M + FAC $67.724 M + CONPES $17.603 M',
+        ejcDetail: '$18.829.796.078 COP (2027–2028): incluye transporte materiales ($10.650 M), sistema antidrones C-UAS ($2.772 M), PTAR nueva, redes y 10 módulos alojamiento, 4 comedores, 4 baterías sanitarias y 2 comando/comunicaciones.',
+        arcDetail: 'Articulación fluvial sobre eje medio río Caquetá (visita técnica ARC ejecutada; sostenimiento fluvial en coordinación con Fuerza Naval de la Amazonía).',
+        facDetail: 'Prefactibilidad FAC: $67.723,7 M COP (concreto hidráulico MR-45 + combustible modular $650M–$3.500M) + CONPES 4205: $17.603 M COP en Estudios y Diseños (vigencia 2027) para ampliación pista a 1.800m × 18m.'
+      },
+      {
+        name: 'Inversión Integral — La Pedrera (Amazonas)',
+        lat: -1.3286,
+        lng: -69.5797,
+        totalSummary: 'EJC $18.012 M + ARC $26.700 M + FAC $67.724 M',
+        ejcDetail: '$18.012.473.333 COP (2027–2028): incluye transporte materiales ($9.550 M), sistema antidrones C-UAS ($2.772 M), mantenimiento PTAR, redes y 8 módulos alojamiento, 4 comedores, 2 baterías baños y 2 comando/comunicaciones.',
+        arcDetail: '$26.700.000.000 COP: fortalecimiento de infraestructura habitable y control fronterizo de la Armada Nacional frente a Vila Bittencourt (Brasil).',
+        facDetail: 'Prefactibilidad FAC: $67.723,7 M COP (pavimento concreto MR-45 + combustible modular $650M–$3.500M) + mitigación predial/operacional obstáculo cementerio a 360 m (RAC 14).'
+      },
+      {
+        name: 'Inversión Integral — Barrancominas / El Galante (Guainía)',
+        lat: 3.49084,
+        lng: -69.80716,
+        totalSummary: 'EJC $17.006 M + ARC $62.000 M + FAC $67.724 M',
+        ejcDetail: '$17.006.013.137 COP (2027–2028): incluye transporte materiales ($9.300 M), sistema antidrones C-UAS ($2.772 M), PTAR nueva, redes y 8 módulos alojamiento, 3 comedores, 2 baterías baños y 2 comando/comunicaciones.',
+        arcDetail: '$62.000.000.000 COP: protección de base ($14.000 M), instalaciones habitables ($28.000 M) y muelle + control de erosión sobre río Guaviare ($20.000 M).',
+        facDetail: 'Prefactibilidad FAC: $67.723,7 M COP (concreto MR-45 + combustible modular $650M–$3.500M) + CONPES 4205 mejoramiento de pista 903m × 17m.'
+      }
+    ];
+
+    let currentInvFilter = 'all';
+
+    function renderLayer12() {
+      layer12Group.clearLayers();
+      const forceColors = {
+        all: { stroke: '#facc15', fill: '#eab308', text: '#fef08a', label: 'CONJUNTO' },
+        ejc: { stroke: '#10b981', fill: '#059669', text: '#6ee7b7', label: 'EJC - COING' },
+        arc: { stroke: '#6366f1', fill: '#4f46e5', text: '#c7d2fe', label: 'ARC' },
+        fac: { stroke: '#38bdf8', fill: '#0284c7', text: '#bae6fd', label: 'FAC / CONPES' }
+      };
+      const pal = forceColors[currentInvFilter];
+
+      investmentNodesData.forEach(inv => {
+        const activeLine = currentInvFilter === 'ejc' ? inv.ejcDetail
+          : currentInvFilter === 'arc' ? inv.arcDetail
+          : currentInvFilter === 'fac' ? inv.facDetail
+          : inv.totalSummary;
+
+        const popupHtml = `
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-2">
+              <h3 class="font-bold text-sm text-yellow-200">💰 ${inv.name}</h3>
+              <span style="background:${pal.fill}38;color:${pal.text};border:1px solid ${pal.stroke};" class="text-[9px] font-bold px-2 py-0.5 rounded-full">
+                ${pal.label}
+              </span>
+            </div>
+            <div class="space-y-1.5 max-h-52 sm:max-h-60 overflow-y-auto pr-1">
+              <div><span class="text-emerald-300 font-bold">● EJC (COING):</span> <span class="text-white/90">${inv.ejcDetail}</span></div>
+              <div><span class="text-indigo-300 font-bold">● ARC (Armada):</span> <span class="text-white/90">${inv.arcDetail}</span></div>
+              <div><span class="text-sky-300 font-bold">● FAC / CONPES:</span> <span class="text-white/90">${inv.facDetail}</span></div>
+              <div class="pt-1.5 border-t border-white/15 text-[10px] text-white/55">
+                Nota: Valores estimados sujetos a validación técnica, estudios/diseños y disponibilidad presupuestal.
+              </div>
+            </div>
+          </div>
+        `;
+
+        L.circle([inv.lat, inv.lng], {
+          radius: 32000,
+          color: pal.stroke,
+          weight: 2,
+          dashArray: '3, 6',
+          fillColor: pal.fill,
+          fillOpacity: 0.12
+        }).bindPopup(popupHtml).addTo(layer12Group);
+
+        const bottomPt = destinationPoint(inv.lat, inv.lng, 32000, 180);
+        L.marker(bottomPt, {
+          icon: L.divIcon({
+            className: 'inv-badge-icon',
+            html: `<div style="background:rgba(15,21,34,0.82);backdrop-filter:blur(12px);border:1px solid ${pal.stroke};color:${pal.text};padding:2px 8px;border-radius:9999px;font-size:9px;font-weight:700;white-space:nowrap;box-shadow:0 3px 8px rgba(0,0,0,0.5);">💰 ${currentInvFilter === 'all' ? inv.totalSummary : activeLine.split(':')[0]}</div>`,
+            iconSize: [190, 18],
+            iconAnchor: [95, 9]
+          }),
+          interactive: true
+        }).bindPopup(popupHtml).addTo(layer12Group);
+      });
+    }
+
+    function setInvFilter(filter) {
+      currentInvFilter = filter;
+      const activeStyles = {
+        all: 'py-1 px-1 text-[10px] font-semibold bg-yellow-300 text-slate-950 seg-active-pill transition',
+        ejc: 'py-1 px-1 text-[10px] font-semibold bg-emerald-400 text-slate-950 seg-active-pill transition',
+        arc: 'py-1 px-1 text-[10px] font-semibold bg-indigo-500 text-white seg-active-pill transition',
+        fac: 'py-1 px-1 text-[10px] font-semibold bg-sky-400 text-slate-950 seg-active-pill transition'
+      };
+      const defaultStyles = {
+        all: 'py-1 px-1 rounded-lg text-[10px] font-medium text-white/65 hover:text-white transition',
+        ejc: 'py-1 px-1 rounded-lg text-[10px] font-medium text-emerald-200 hover:bg-emerald-500/20 transition',
+        arc: 'py-1 px-1 rounded-lg text-[10px] font-medium text-indigo-200 hover:bg-indigo-500/20 transition',
+        fac: 'py-1 px-1 rounded-lg text-[10px] font-medium text-sky-200 hover:bg-sky-500/20 transition'
+      };
+      ['all', 'ejc', 'arc', 'fac'].forEach(f => {
+        document.getElementById('inv-' + f).className = (f === filter) ? activeStyles[f] : defaultStyles[f];
+      });
+      renderLayer12();
+    }
+
+    function setMileType(type) {
+      currentMileType = type;
+      const btnNM = document.getElementById('btnNM');
+      const btnSM = document.getElementById('btnSM');
+      if (type === 'NM') {
+        btnNM.className = 'py-1.5 px-2 text-xs font-semibold bg-amber-400 text-slate-950 seg-active-pill transition';
+        btnSM.className = 'py-1.5 px-2 rounded-lg text-xs font-medium text-white/65 hover:text-white transition';
+      } else {
+        btnSM.className = 'py-1.5 px-2 text-xs font-semibold bg-amber-400 text-slate-950 seg-active-pill transition';
+        btnNM.className = 'py-1.5 px-2 rounded-lg text-xs font-medium text-white/65 hover:text-white transition';
+      }
+      renderLayer2();
+      renderDistances();
+    }
+
+    // Líneas de enlace y cálculo de distancias entre las 3 bases
+    function renderDistances() {
+      distanceGroup.clearLayers();
+      const pairs = [
+        [locations[0], locations[1]],
+        [locations[1], locations[2]],
+        [locations[2], locations[0]]
+      ];
+
+      pairs.forEach(([a, b]) => {
+        const pA = L.latLng(a.lat, a.lng);
+        const pB = L.latLng(b.lat, b.lng);
+        const distMeters = pA.distanceTo(pB);
+        const distKm = (distMeters / 1000).toFixed(0);
+        const distUnit = currentMileType === 'NM'
+          ? `${(distMeters / NM_TO_METERS).toFixed(0)} NM`
+          : `${(distMeters / SM_TO_METERS).toFixed(0)} MI`;
+
+        L.polyline([pA, pB], {
+          color: '#38bdf8',
+          weight: 1.5,
+          opacity: 0.65,
+          dashArray: '5, 7'
+        }).addTo(distanceGroup);
+
+        const midLat = (a.lat + b.lat) / 2;
+        const midLng = (a.lng + b.lng) / 2;
+        L.marker([midLat, midLng], {
+          icon: L.divIcon({
+            className: 'dist-mid-icon',
+            html: `<div class="distance-label">${distUnit} (${distKm} km)</div>`,
+            iconSize: [115, 20],
+            iconAnchor: [57, 10]
+          }),
+          interactive: false
+        }).addTo(distanceGroup);
+      });
+    }
+
+    // Renderizar Capa 2 (Círculos de 40 millas estilo retícula radar FAC)
+    function destinationPoint(lat, lng, distanceMeters, bearingDeg) {
+      const R = 6371000;
+      const brng = bearingDeg * Math.PI / 180;
+      const lat1 = lat * Math.PI / 180;
+      const lon1 = lng * Math.PI / 180;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceMeters / R) +
+        Math.cos(lat1) * Math.sin(distanceMeters / R) * Math.cos(brng));
+      const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(distanceMeters / R) * Math.cos(lat1),
+        Math.cos(distanceMeters / R) - Math.sin(lat1) * Math.sin(lat2));
+      return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
+    }
+
+    function renderLayer2() {
+      layer2Group.clearLayers();
+      const radiusMeters = currentMileType === 'NM' ? 40 * NM_TO_METERS : 40 * SM_TO_METERS;
+      const unitText = currentMileType === 'NM' ? '40 NM (74,08 km)' : '40 MI (64,37 km)';
+      const showBadges = document.getElementById('toggleOaciBadges').checked;
+
+      facAerodromes.forEach(aero => {
+        if (currentFacGroupFilter !== 'all' && aero.group !== currentFacGroupFilter) return;
+
+        const pal = facColorPalette[aero.group];
+        const popupHtml = `
+          <div class="w-full p-0.5 text-xs">
+            <div class="flex items-center justify-between border-b border-white/15 pb-1.5 mb-1.5">
+              <strong style="color:${pal.stroke}" class="text-sm">${aero.oaci} — ${aero.name}</strong>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 border" style="border-color:${pal.stroke};color:${pal.stroke}">
+                ${pal.label}
+              </span>
+            </div>
+            <div class="space-y-1 text-white/85">
+              <div><span class="text-white/55">Departamento:</span> ${aero.dept}</div>
+              <div><span class="text-white/55">Autonomía:</span> <strong class="text-white">${unitText}</strong></div>
+              <p class="text-white/70 text-[11px] pt-1.5 border-t border-white/15">${aero.role}</p>
+            </div>
+          </div>
+        `;
+
+        L.circle([aero.lat, aero.lng], {
+          radius: radiusMeters,
+          color: pal.stroke,
+          weight: 2.2,
+          opacity: 0.95,
+          fillColor: pal.fill,
+          fillOpacity: 0.10
+        }).bindPopup(popupHtml).addTo(layer2Group);
+
+        [0.66, 0.33].forEach(factor => {
+          L.circle([aero.lat, aero.lng], {
+            radius: radiusMeters * factor,
+            color: pal.stroke,
+            weight: 1.2,
+            opacity: 0.65,
+            fill: false,
+            interactive: false
+          }).addTo(layer2Group);
+        });
+
+        for (let angle = 0; angle < 360; angle += 45) {
+          const edgePt = destinationPoint(aero.lat, aero.lng, radiusMeters, angle);
+          L.polyline([[aero.lat, aero.lng], edgePt], {
+            color: pal.stroke,
+            weight: 1.1,
+            opacity: 0.55,
+            interactive: false
+          }).addTo(layer2Group);
+        }
+
+        if (!['SKAC', 'SKLP', 'SKBM'].includes(aero.oaci)) {
+          L.circleMarker([aero.lat, aero.lng], {
+            radius: 5,
+            color: '#ffffff',
+            weight: 1.5,
+            fillColor: pal.stroke,
+            fillOpacity: 1
+          }).bindPopup(popupHtml).addTo(layer2Group);
+        }
+
+        if (showBadges) {
+          const topEdge = destinationPoint(aero.lat, aero.lng, radiusMeters * 0.68, 0);
+          L.marker(topEdge, {
+            icon: L.divIcon({
+              className: 'fac-oaci-badge',
+              html: `<div style="background:rgba(255,255,255,0.94);color:#0f172a;border:1.5px solid ${pal.badgeBorder};padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:0.4px;box-shadow:0 3px 8px rgba(0,0,0,0.55);text-align:center;">${aero.oaci}</div>`,
+              iconSize: [44, 18],
+              iconAnchor: [22, 9]
+            }),
+            interactive: false
+          }).addTo(layer2Group);
+        }
+      });
+
+      const rKm = (radiusMeters / 1000).toFixed(2);
+      const areaKm2 = Math.round(Math.PI * Math.pow(radiusMeters / 1000, 2)).toLocaleString('es-CO');
+      document.getElementById('unitLabel').textContent = currentMileType === 'NM' ? 'Millas Náuticas (NM)' : 'Millas Terrestres (MI)';
+      document.getElementById('radiusKmLabel').textContent = `${rKm} km`;
+      document.getElementById('areaKmLabel').textContent = `${areaKm2} km²`;
+    }
+
+    function setFacGroupFilter(group) {
+      currentFacGroupFilter = group;
+      const styles = {
+        all: 'py-1 px-1 text-[10px] font-semibold bg-white/25 text-white seg-active-pill transition',
+        red: 'py-1 px-1 text-[10px] font-semibold bg-red-500 text-white seg-active-pill transition',
+        yellow: 'py-1 px-1 text-[10px] font-semibold bg-yellow-300 text-slate-950 seg-active-pill transition',
+        blue: 'py-1 px-1 text-[10px] font-semibold bg-blue-500 text-white seg-active-pill transition'
+      };
+      const defaultStyles = {
+        all: 'py-1 px-1 rounded-lg text-[10px] font-medium text-white/65 hover:text-white transition',
+        red: 'py-1 px-1 rounded-lg text-[10px] font-medium text-red-300 hover:bg-red-500/20 transition',
+        yellow: 'py-1 px-1 rounded-lg text-[10px] font-medium text-yellow-200 hover:bg-yellow-500/20 transition',
+        blue: 'py-1 px-1 rounded-lg text-[10px] font-medium text-sky-300 hover:bg-sky-500/20 transition'
+      };
+      ['all', 'red', 'yellow', 'blue'].forEach(g => {
+        document.getElementById('fac-' + g).className = (g === group) ? styles[g] : defaultStyles[g];
+      });
+      renderLayer2();
+    }
+
+    // Configuración de píldoras de acceso rápido en la Dynamic Island superior
+    const islandLayerMeta = [
+      { num: 1, short: '1. Bases', dot: '#f87171', glow: 'rgba(248, 113, 113, 0.28)', border: 'rgba(252, 165, 165, 0.55)' },
+      { num: 2, short: '2. 40 Millas', dot: '#fcd34d', glow: 'rgba(252, 211, 77, 0.26)', border: 'rgba(253, 224, 71, 0.55)' },
+      { num: 3, short: '3. Ríos', dot: '#67e8f9', glow: 'rgba(103, 232, 249, 0.25)', border: 'rgba(165, 243, 252, 0.55)' },
+      { num: 4, short: '4. Parques', dot: '#6ee7b7', glow: 'rgba(110, 231, 183, 0.25)', border: 'rgba(167, 243, 208, 0.55)' },
+      { num: 5, short: '5. Defor/EIYM', dot: '#fb7185', glow: 'rgba(251, 113, 133, 0.26)', border: 'rgba(253, 164, 175, 0.55)' },
+      { num: 6, short: '6. Coca', dot: '#bef264', glow: 'rgba(190, 242, 100, 0.25)', border: 'rgba(217, 249, 157, 0.55)' },
+      { num: 7, short: '7. Fluvial ARC', dot: '#818cf8', glow: 'rgba(129, 140, 248, 0.28)', border: 'rgba(199, 210, 254, 0.55)' },
+      { num: 8, short: '8. Vías', dot: '#fb923c', glow: 'rgba(251, 146, 60, 0.26)', border: 'rgba(253, 186, 116, 0.55)' },
+      { num: 9, short: '9. Viabilidad', dot: '#5eead4', glow: 'rgba(94, 234, 212, 0.25)', border: 'rgba(153, 246, 228, 0.55)' },
+      { num: 10, short: '10. GAO/GAO-r', dot: '#c084fc', glow: 'rgba(192, 132, 252, 0.28)', border: 'rgba(233, 213, 255, 0.55)' },
+      { num: 11, short: '11. Telecom', dot: '#7dd3fc', glow: 'rgba(125, 211, 252, 0.26)', border: 'rgba(186, 230, 253, 0.55)' },
+      { num: 12, short: '12. Inversión', dot: '#fde047', glow: 'rgba(253, 224, 71, 0.26)', border: 'rgba(254, 240, 138, 0.55)' }
+    ];
+
+    function buildIslandLayerPills() {
+      const container = document.getElementById('islandLayersContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      islandLayerMeta.forEach(item => {
+        const btn = document.createElement('button');
+        btn.id = 'island-chip-' + item.num;
+        btn.type = 'button';
+        btn.title = `Activar / desactivar ${item.short}`;
+        btn.className = 'island-layer-chip px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border';
+        btn.innerHTML = `
+          <span class="w-2 h-2 rounded-full shrink-0" style="background:${item.dot};box-shadow:0 0 6px ${item.dot};"></span>
+          <span>${item.short}</span>
+        `;
+        btn.onclick = () => quickToggleLayer(item.num);
+        container.appendChild(btn);
+      });
+
+      const distBtn = document.createElement('button');
+      distBtn.id = 'island-chip-dist';
+      distBtn.type = 'button';
+      distBtn.title = 'Activar / desactivar líneas de distancia entre bases';
+      distBtn.className = 'island-layer-chip px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border';
+      distBtn.innerHTML = `
+        <span class="w-2 h-2 rounded-full shrink-0" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8;"></span>
+        <span>Enlaces</span>
+      `;
+      distBtn.onclick = () => quickToggleDistances();
+      container.appendChild(distBtn);
+
+      syncIslandChipsState();
+    }
+
+    function syncIslandChipsState() {
+      islandLayerMeta.forEach(item => {
+        const chip = document.getElementById('island-chip-' + item.num);
+        const cb = document.getElementById('toggleLayer' + item.num);
+        if (!chip || !cb) return;
+        if (cb.checked) {
+          chip.style.background = item.glow;
+          chip.style.borderColor = item.border;
+          chip.style.color = '#ffffff';
+          chip.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.32), 0 2px 8px rgba(0,0,0,0.35)';
+          chip.style.opacity = '1';
+        } else {
+          chip.style.background = 'rgba(255, 255, 255, 0.05)';
+          chip.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+          chip.style.color = 'rgba(255, 255, 255, 0.52)';
+          chip.style.boxShadow = 'none';
+          chip.style.opacity = '0.82';
+        }
+      });
+
+      const distChip = document.getElementById('island-chip-dist');
+      const distCb = document.getElementById('toggleDistances');
+      if (distChip && distCb) {
+        if (distCb.checked) {
+          distChip.style.background = 'rgba(56, 189, 248, 0.25)';
+          distChip.style.borderColor = 'rgba(125, 211, 252, 0.55)';
+          distChip.style.color = '#ffffff';
+          distChip.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.32)';
+          distChip.style.opacity = '1';
+        } else {
+          distChip.style.background = 'rgba(255, 255, 255, 0.05)';
+          distChip.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+          distChip.style.color = 'rgba(255, 255, 255, 0.52)';
+          distChip.style.boxShadow = 'none';
+          distChip.style.opacity = '0.82';
+        }
+      }
+    }
+
+    function quickToggleLayer(num) {
+      const cb = document.getElementById('toggleLayer' + num);
+      if (!cb) return;
+      cb.checked = !cb.checked;
+      toggleLayer(num);
+    }
+
+    function quickToggleDistances() {
+      const cb = document.getElementById('toggleDistances');
+      if (!cb) return;
+      cb.checked = !cb.checked;
+      toggleDistancesLayer();
+    }
+
+    function toggleLayer(num) {
+      const layerMap = {
+        1: layer1Group, 2: layer2Group, 3: layer3Group, 4: layer4Group,
+        5: layer5Group, 6: layer6Group, 7: layer7Group, 8: layer8Group,
+        9: layer9Group, 10: layer10Group, 11: layer11Group, 12: layer12Group
+      };
+      const cb = document.getElementById('toggleLayer' + num);
+      const grp = layerMap[num];
+      if (cb && grp) {
+        cb.checked ? map.addLayer(grp) : map.removeLayer(grp);
+      }
+      updateActiveLayersCounter();
+      syncIslandChipsState();
+    }
+
+    function updateActiveLayersCounter() {
+      let count = 0;
+      for (let i = 1; i <= 12; i++) {
+        const el = document.getElementById('toggleLayer' + i);
+        if (el && el.checked) count++;
+      }
+      const footerCount = document.getElementById('activeLayersCount');
+      if (footerCount) footerCount.textContent = count;
+      const floatingBadge = document.getElementById('floatingLayerCount');
+      if (floatingBadge) floatingBadge.textContent = count;
+    }
+
+    function toggleDistancesLayer() {
+      document.getElementById('toggleDistances').checked ? map.addLayer(distanceGroup) : map.removeLayer(distanceGroup);
+      syncIslandChipsState();
+    }
+
+    function fitAllBases() {
+      const bounds = L.latLngBounds(locations.map(l => [l.lat, l.lng]));
+      map.fitBounds(bounds, { padding: window.innerWidth < 640 ? [45, 45] : [75, 75] });
+    }
+
+    function resetToLayer1Only() {
+      const cb1 = document.getElementById('toggleLayer1');
+      if (cb1) cb1.checked = true;
+      if (!map.hasLayer(layer1Group)) map.addLayer(layer1Group);
+
+      const extraLayerGroups = {
+        2: layer2Group, 3: layer3Group, 4: layer4Group, 5: layer5Group,
+        6: layer6Group, 7: layer7Group, 8: layer8Group, 9: layer9Group,
+        10: layer10Group, 11: layer11Group, 12: layer12Group
+      };
+
+      for (let i = 2; i <= 12; i++) {
+        const cb = document.getElementById('toggleLayer' + i);
+        if (cb) cb.checked = false;
+        const grp = extraLayerGroups[i];
+        if (grp && map.hasLayer(grp)) {
+          map.removeLayer(grp);
+        }
+      }
+
+      const cbDist = document.getElementById('toggleDistances');
+      if (cbDist) cbDist.checked = false;
+      if (map.hasLayer(distanceGroup)) {
+        map.removeLayer(distanceGroup);
+      }
+
+      updateActiveLayersCounter();
+      syncIslandChipsState();
+    }
+
+    function syncFloatingBarPosition(isSidebarOpenDesktop) {
+      const bar = document.getElementById('floatingTopBar');
+      if (!bar) return;
+      if (window.innerWidth >= 768 && isSidebarOpenDesktop) {
+        bar.classList.remove('md:left-3.5', 'md:max-w-[calc(100vw-72px)]');
+        bar.classList.add('md:left-[398px]', 'md:max-w-[calc(100vw-464px)]');
+      } else {
+        bar.classList.remove('md:left-[398px]', 'md:max-w-[calc(100vw-464px)]');
+        bar.classList.add('md:left-3.5', 'md:max-w-[calc(100vw-72px)]');
+      }
+    }
+
+    function openSidebar() {
+      const sb = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sb.classList.remove('-translate-x-[112%]', 'md:hidden');
+      if (window.innerWidth < 768) {
+        backdrop.classList.remove('hidden');
+      }
+      syncFloatingBarPosition(true);
+      setTimeout(() => map.invalidateSize(), 310);
+    }
+
+    function closeSidebar() {
+      const sb = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sb.classList.add('-translate-x-[112%]');
+      if (window.innerWidth >= 768) {
+        sb.classList.add('md:hidden');
+      }
+      backdrop.classList.add('hidden');
+      syncFloatingBarPosition(false);
+      setTimeout(() => map.invalidateSize(), 310);
+    }
+
+    function closeSidebarOnMobile() {
+      if (window.innerWidth < 768) {
+        closeSidebar();
+      }
+    }
+
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar');
+      const isClosedMobile = sb.classList.contains('-translate-x-[112%]') && window.innerWidth < 768;
+      const isClosedDesktop = sb.classList.contains('md:hidden') && window.innerWidth >= 768;
+      if (isClosedMobile || isClosedDesktop) {
+        openSidebar();
+      } else {
+        closeSidebar();
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      const sb = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (window.innerWidth >= 768) {
+        backdrop.classList.add('hidden');
+        const isOpen = !sb.classList.contains('md:hidden');
+        if (isOpen) {
+          sb.classList.remove('-translate-x-[112%]');
+        }
+        syncFloatingBarPosition(isOpen);
+      } else {
+        sb.classList.remove('md:hidden');
+        if (!sb.classList.contains('-translate-x-[112%]')) {
+          backdrop.classList.remove('hidden');
+        }
+        syncFloatingBarPosition(false);
+      }
+      map.invalidateSize();
+    });
+
+    // Inicializar visualizaciones
+    buildIslandLayerPills();
+    renderLayer4();
+    renderLayer5();
+    renderLayer6();
+    renderLayer10();
+    renderLayer8();
+    renderLayer3();
+    renderLayer2();
+    renderLayer11();
+    renderLayer12();
+    renderLayer9();
+    renderLayer7();
+    renderDistances();
+    syncFloatingBarPosition(window.innerWidth >= 768);
+    fitAllBases();
+  </script>
+</body>
+</html>
