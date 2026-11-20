@@ -475,33 +475,33 @@
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-red-400 shadow-[0_0_10px_#f87171]"></span>
-            <h2 class="text-sm font-semibold text-white">Capa 1: Poblaciones Base (3)</h2>
+            <h2 class="text-sm font-semibold text-white">Capa 1: Bases Prioridad 1 (3)</h2>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="toggleLayer1" checked class="sr-only peer" onchange="toggleLayer(1)">
             <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-red-500/85 peer-checked:border-red-300/50"></div>
           </label>
         </div>
-        <p class="text-xs text-white/75 mb-2.5">Nodos priorizados con unidades militares, diagnóstico en terreno y alerta RAC 14:</p>
+        <p class="text-xs text-white/75 mb-2.5">Nodos <strong class="text-red-300">Prioridad 1</strong> con requerimientos técnicos y asignación presupuestal:</p>
         <div class="space-y-1.5">
           <button onclick="focusNode('araracuara')" class="w-full text-left px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] border border-white/10 transition flex items-center justify-between group active:scale-[0.99]">
             <div>
               <span class="text-xs font-semibold text-white group-hover:text-red-300 transition">1. Araracuara (SKAC)</span>
-              <span class="block text-[11px] text-white/60">Solano, Caquetá • BATOT21 / BILAC50</span>
-            </div>
-            <span class="text-[11px] text-white/50 group-hover:text-white">Ir →</span>
-          </button>
-          <button onclick="focusNode('lapedrera')" class="w-full text-left px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] border border-white/10 transition flex items-center justify-between group active:scale-[0.99]">
-            <div>
-              <span class="text-xs font-semibold text-white group-hover:text-red-300 transition">2. La Pedrera (SKLP)</span>
-              <span class="block text-[11px] text-white/60">Amazonas • Alerta RAC 14 (360 m)</span>
+              <span class="block text-[11px] text-white/60">Prioridad 1 • Solano, Caquetá</span>
             </div>
             <span class="text-[11px] text-white/50 group-hover:text-white">Ir →</span>
           </button>
           <button onclick="focusNode('barrancominas')" class="w-full text-left px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] border border-white/10 transition flex items-center justify-between group active:scale-[0.99]">
             <div>
-              <span class="text-xs font-semibold text-white group-hover:text-red-300 transition">3. Barrancominas (SKBM)</span>
-              <span class="block text-[11px] text-white/60">Guainía • BIPIN45 / PFA52</span>
+              <span class="text-xs font-semibold text-white group-hover:text-red-300 transition">2. Barrancominas (SKBM)</span>
+              <span class="block text-[11px] text-white/60">Prioridad 1 • Guainía</span>
+            </div>
+            <span class="text-[11px] text-white/50 group-hover:text-white">Ir →</span>
+          </button>
+          <button onclick="focusNode('tarapaca')" class="w-full text-left px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] border border-white/10 transition flex items-center justify-between group active:scale-[0.99]">
+            <div>
+              <span class="text-xs font-semibold text-white group-hover:text-red-300 transition">3. Tarapacá (SKRA)</span>
+              <span class="block text-[11px] text-white/60">Prioridad 1 • Amazonas</span>
             </div>
             <span class="text-[11px] text-white/50 group-hover:text-white">Ir →</span>
           </button>
@@ -513,22 +513,22 @@
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_10px_#fcd34d]"></span>
-            <h2 class="text-sm font-semibold text-white">Capa 2: Red Aeródromos FAC (40 mi)</h2>
+            <h2 class="text-sm font-semibold text-white">Capa 2: Red Aeródromos FAC (90 mi)</h2>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="toggleLayer2" class="sr-only peer" onchange="toggleLayer(2)">
             <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-amber-500/85 peer-checked:border-amber-200/50"></div>
           </label>
         </div>
-        <p class="text-xs text-white/75 mb-2.5">Cobertura radial de <strong class="text-amber-300">40 millas</strong> en los 12 aeródromos del mapa FAC:</p>
+        <p class="text-xs text-white/75 mb-2.5">Cobertura radial de <strong class="text-amber-300">90 millas</strong> en los 12 aeródromos del mapa FAC:</p>
 
         <!-- Selector de Unidad (Millas Náuticas vs Terrestres) -->
         <div class="grid grid-cols-2 gap-1 liquid-segmented p-1 mb-2.5">
           <button id="btnNM" onclick="setUnit('NM')" class="py-1.5 px-2 text-xs font-semibold bg-amber-400/90 text-slate-950 seg-active-pill transition">
-            40 NM (74,1 km)
+            90 NM (166,7 km)
           </button>
           <button id="btnMI" onclick="setUnit('MI')" class="py-1.5 px-2 text-xs font-medium text-white/75 hover:text-white rounded-lg transition">
-            40 MI (64,4 km)
+            90 MI (144,8 km)
           </button>
         </div>
 
@@ -549,7 +549,7 @@
         </div>
 
         <div class="bg-black/25 rounded-xl p-2.5 border border-white/10 text-[11px] space-y-1 text-white/80">
-          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> <span><strong>Rojo (3):</strong> SKAC, SKLP, SKBM</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> <span><strong>Rojo (3):</strong> SKAC, SKBM, SKRA</span></div>
           <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block"></span> <span><strong>Amarillo (5):</strong> SKUC, SKPD, SKSJ, SKNA, SKMU</span></div>
           <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> <span><strong>Azul (4):</strong> SKYP, SKUA, SKTQ, SKLT</span></div>
         </div>
@@ -705,7 +705,7 @@
 
         <div class="bg-black/25 rounded-xl p-2 border border-white/10 text-[10.5px] space-y-1 text-white/80">
           <div class="flex justify-between"><span>Barrancominas (PFA52):</span> <strong class="text-amber-200">$62.000 M</strong></div>
-          <div class="flex justify-between"><span>La Pedrera (BFLIM30):</span> <strong class="text-amber-200">$26.700 M</strong></div>
+          <div class="flex justify-between"><span>Tarapacá (BFLIM30):</span> <strong class="text-amber-200">$26.700 M</strong></div>
         </div>
       </div>
 
@@ -877,6 +877,83 @@
         </div>
       </div>
 
+      <!-- CAPA 13: DINÁMICA OPERACIONAL (3 ZONAS: ACTUAL E IDEAL) -->
+      <div class="liquid-card p-3.5">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#4ade80]"></span>
+            <h2 class="text-sm font-semibold text-white">Capa 13: Dinámica Operacional</h2>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="toggleLayer13" class="sr-only peer" onchange="toggleLayer(13)">
+            <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-emerald-500/85 peer-checked:border-emerald-200/50"></div>
+          </label>
+        </div>
+        <p class="text-xs text-white/75 mb-2.5">Zonificación de dinámica operacional en 3 áreas (selecciona escenario):</p>
+
+        <!-- Selector de 2 estados: Actual e Ideal -->
+        <div class="grid grid-cols-2 gap-1 liquid-segmented p-1 mb-2.5">
+          <button onclick="setDynamicState('ACTUAL')" id="dyn-ACTUAL" class="dyn-btn py-1.5 px-2 text-xs font-semibold bg-emerald-400 text-slate-950 seg-active-pill transition">
+            Actual
+          </button>
+          <button onclick="setDynamicState('IDEAL')" id="dyn-IDEAL" class="dyn-btn py-1.5 px-2 text-xs font-medium text-white/75 hover:text-white rounded-lg transition">
+            Ideal
+          </button>
+        </div>
+
+        <div id="dynamicLegendBox" class="bg-black/25 rounded-xl p-2 border border-white/10 text-[10.5px] space-y-1 text-white/80">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block"></span> Dinámica Operacional Alta</span>
+            <strong id="dynPctHigh" class="text-green-300">80%</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-sky-400 inline-block"></span> Dinámica Operacional Media</span>
+            <strong id="dynPctMed" class="text-sky-300">15%</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block"></span> Dinámica Operacional Baja</span>
+            <strong id="dynPctLow" class="text-red-300">5%</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAPA 14: DESPLIEGUE EJÉRCITO NACIONAL -->
+      <div class="liquid-card p-3.5">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-fuchsia-400 shadow-[0_0_10px_#e879f9]"></span>
+            <h2 class="text-sm font-semibold text-white">Capa 14: Despliegue Ejército</h2>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="toggleLayer14" class="sr-only peer" onchange="toggleLayer(14)">
+            <div class="w-10 h-6 ios-switch-track rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-[18px] after:w-[18px] peer-checked:bg-fuchsia-500/85 peer-checked:border-fuchsia-200/50"></div>
+          </label>
+        </div>
+        <p class="text-xs text-white/75 mb-2.5">Dispositivo orgánico terrestre (Divisiones IV, VI, VIII y FTC Omega):</p>
+
+        <div class="grid grid-cols-4 gap-1 liquid-segmented p-1 mb-2.5">
+          <button onclick="setArmyFilter('ALL')" id="ejc-ALL" class="ejc-btn py-1 px-1 text-[10px] font-semibold bg-fuchsia-500 text-white seg-active-pill transition">
+            Todos
+          </button>
+          <button onclick="setArmyFilter('FC')" id="ejc-FC" class="ejc-btn py-1 px-1 text-[10px] font-medium text-white/75 hover:text-white rounded-lg transition">
+            Fuert/Cant
+          </button>
+          <button onclick="setArmyFilter('BAT')" id="ejc-BAT" class="ejc-btn py-1 px-1 text-[10px] font-medium text-white/75 hover:text-white rounded-lg transition">
+            Batallón
+          </button>
+          <button onclick="setArmyFilter('BASE')" id="ejc-BASE" class="ejc-btn py-1 px-1 text-[10px] font-medium text-white/75 hover:text-white rounded-lg transition">
+            Bases
+          </button>
+        </div>
+
+        <div class="bg-black/25 rounded-xl p-2 border border-white/10 text-[10.5px] grid grid-cols-2 gap-1.5 text-white/85">
+          <div class="flex items-center gap-1.5"><span class="text-fuchsia-300 font-bold">▲</span> <span>Fuerte Militar (3)</span></div>
+          <div class="flex items-center gap-1.5"><span class="text-fuchsia-300 font-bold">★</span> <span>Cantones (11)</span></div>
+          <div class="flex items-center gap-1.5"><span class="text-fuchsia-300 font-bold">⬟</span> <span>Batallón (28)</span></div>
+          <div class="flex items-center gap-1.5"><span class="text-fuchsia-300 font-bold">●</span> <span>Bases (38)</span></div>
+        </div>
+      </div>
+
       <!-- CAPA AUXILIAR: DISTANCIAS ENTRE NODOS -->
       <div class="liquid-card p-3.5">
         <div class="flex items-center justify-between mb-1.5">
@@ -890,7 +967,7 @@
           </label>
         </div>
         <p class="text-[11px] text-white/65 leading-relaxed">
-          Compara el radio de 40 millas frente a la distancia real entre nodos (ej. ~173 NM entre Araracuara y La Pedrera).
+          Compara el radio de 90 millas frente a la distancia real entre las bases Prioridad 1 (Araracuara, Barrancominas y Tarapacá).
         </p>
       </div>
 
@@ -911,7 +988,7 @@
 
     <!-- Footer de estado del panel -->
     <div class="px-4 py-2.5 border-t border-white/15 bg-black/25 flex items-center justify-between text-[11px] text-white/65 shrink-0">
-      <span>Capas activas: <strong id="activeLayersCount" class="text-amber-300 font-bold">1</strong> / 12</span>
+      <span>Capas activas: <strong id="activeLayersCount" class="text-amber-300 font-bold">1</strong> / 14</span>
       <span class="text-[10px] text-white/50">Plan Yuruparí • CGFM / J5</span>
     </div>
   </aside>
@@ -934,13 +1011,13 @@
 
     <div class="h-5 w-[1px] bg-white/20 shrink-0 mx-0.5"></div>
 
-    <!-- Selector rápido desplazable de las 12 capas + Enlaces -->
+    <!-- Selector rápido desplazable de las 13 capas + Enlaces -->
     <div id="islandLayerChips" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 pr-1">
       <button id="chip-layer-1" onclick="toggleLayerFromChip(1)" class="island-chip active px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-red-400"></span><span>1. Bases</span>
       </button>
       <button id="chip-layer-2" onclick="toggleLayerFromChip(2)" class="island-chip px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-amber-300"></span><span>2. 40 Millas</span>
+        <span class="w-2 h-2 rounded-full bg-amber-300"></span><span>2. 90 Millas</span>
       </button>
       <button id="chip-layer-3" onclick="toggleLayerFromChip(3)" class="island-chip px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-cyan-300"></span><span>3. Ríos</span>
@@ -972,6 +1049,12 @@
       <button id="chip-layer-12" onclick="toggleLayerFromChip(12)" class="island-chip px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-yellow-300"></span><span>12. Inversión</span>
       </button>
+      <button id="chip-layer-13" onclick="toggleLayerFromChip(13)" class="island-chip px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>13. Dinámica Op.</span>
+      </button>
+      <button id="chip-layer-14" onclick="toggleLayerFromChip(14)" class="island-chip px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-fuchsia-400"></span><span>14. Ejército</span>
+      </button>
       <button id="chip-distances" onclick="toggleDistancesFromChip()" class="island-chip px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-sky-200"></span><span>Enlaces</span>
       </button>
@@ -979,54 +1062,48 @@
   </div>
 
   <script>
-    // 1. Datos geográficos y técnicos de las 3 poblaciones base (Capa 1)
+    // 1. Datos geográficos, necesidades y presupuesto de las 3 Bases Prioridad 1 (Capa 1)
     const nodesData = [
       {
         id: 'araracuara',
         name: 'Araracuara',
         oaci: 'SKAC',
+        priority: 'Prioridad 1',
         dept: 'Solano, Caquetá',
         lat: -0.6169,
         lng: -72.3822,
-        coordsText: '0° 37\' 01" S, 72° 22\' 56" O',
-        population: '~165 hab. cabecera (DANE) + población dispersa resguardos (Uitoto, Andoque, Nonuya)',
-        economy: 'Chagra tradicional, pesca artesanal en río Caquetá, logística institucional/militar y suministro aéreo.',
-        units: 'BATOT21 y BILAC50 (Ejército Nacional)',
-        visitStatus: 'Visitada por EJC, ARC y FAC (Oct 2026). PTAP requiere intervención; pista 1.800×18 m proyectada CONPES 4205.'
-      },
-      {
-        id: 'lapedrera',
-        name: 'La Pedrera',
-        oaci: 'SKLP',
-        dept: 'Área No Municipalizada, Amazonas',
-        lat: -1.3286,
-        lng: -69.5797,
-        coordsText: '1° 19\' 43" S, 69° 34\' 47" O',
-        population: '~4.132 – 4.985 hab. (proy. DANE 2025–2026); resguardos Comeyafú, Curare, Yaigojé Apaporis.',
-        economy: 'Acopio pesquero (consumo y ornamentales), comercio fronterizo con Brasil (Vila Bittencourt) y defensa.',
-        units: 'BFLIM30 / Destacamento Fluvial ARC + Guarnición EJC',
-        visitStatus: 'Visitada por EJC. ALERTA RAC 14: cementerio civil a 360 m de pista; inversión ARC $26.700 M COP.'
+        needs: 'Ampliación y pavimentación de pista a 1.800 × 18 m en concreto MR-45 (drenajes, llave de giro, franjas y cerramiento); rehabilitación de PTAP/PTAR y redes; respaldo energético ($710,65 M); estación satelital VSAT + SD-WAN/LEO ($261 M) + repetidor Trunking Motorola GTR8000 ESS ($180.000 USD); radioayudas VOR/DME y estación AWOS.',
+        budget: 'EJC COING: $17.949,4 M COP • EJC CECCO: $971,65 M COP + $180.000 USD • FAC Prefactibilidad MR-45: $67.723,7 M COP • CONPES 4205 Aerocivil: $194.602,24 M COP (2026–2031).'
       },
       {
         id: 'barrancominas',
         name: 'Barrancominas',
         oaci: 'SKBM',
-        dept: 'Municipio de Guainía (DIVIPOLA 94343)',
+        priority: 'Prioridad 1',
+        dept: 'Guainía',
         lat: 3.49084,
         lng: -69.80716,
-        coordsText: '3° 29\' 27" N, 69° 48\' 26" O',
-        population: '~11.709 – 12.020 hab. municipal (~1.311 cabecera); etnias Piapoco, Puinave, Curripaco, Sikuani.',
-        economy: 'Nodo comercial y fluvial sobre el río Guaviare (5.533 pax y 501,3 ton carga aérea en 2025).',
-        units: 'BIPIN45 (Ejército Nacional) y PFA52 (Armada Nacional)',
-        visitStatus: 'Visitada por EJC. Brecha aislamiento terrestre 1,0 DNP; pista 903×17 m CONPES 4205; inversión ARC $62.000 M.'
+        needs: 'Ampliación de pista a 23 m de ancho en pavimento rígido (CONPES 903 × 17 m / MR-45), plataforma (9.545 m²) y calle de rodaje (846 m²); PTAR nueva, red hidráulica y sistema eléctrico ($356,6 M); mantenimiento satelital VSAT + SD-WAN/LEO ($121 M); muelle fluvial, control de erosión y habitabilidad ARC; radioayudas VOR/DME y AWOS.',
+        budget: 'EJC COING: $17.949,4 M COP • EJC CECCO: $477,6 M COP • ARC Fluvial: $62.000,0 M COP • FAC Prefactibilidad MR-45: $67.723,7 M COP • CONPES 4205 Aerocivil: $248.681,05 M COP (2026–2033).'
+      },
+      {
+        id: 'tarapaca',
+        name: 'Tarapacá',
+        oaci: 'SKRA',
+        priority: 'Prioridad 1',
+        dept: 'Amazonas',
+        lat: -2.8781,
+        lng: -69.7439,
+        needs: 'Construcción/adecuación de pista en concreto MR-45 con evaluación y despeje de obstáculos (RAC 14), cerramiento perimetral y drenajes; mantenimiento de PTAR, redes hidrosanitarias y respaldo energético ($27 M); mantenimiento satelital VSAT/puesta a tierra ($90 M) + SD-WAN/LEO ($61 M) + repetidor Trunking GTR8000 ESS ($180.000 USD); infraestructura habitable y apoyo fluvial ARC (BFLIM30); radioayudas VOR/DME y AWOS.',
+        budget: 'EJC COING: $17.949,4 M COP • EJC CECCO: $178,0 M COP + $180.000 USD • ARC Fluvial: $26.700,0 M COP • FAC Prefactibilidad MR-45: $67.723,7 M COP.'
       }
     ];
 
-    // Datos Capa 2: 12 Aeródromos de la diapositiva FAC
+    // Datos Capa 2: 12 Aeródromos de la diapositiva FAC (anillo rojo en SKAC, SKBM y SKRA; sin anillo en La Pedrera)
     const facAerodromesData = [
-      { oaci: 'SKAC', name: 'Araracuara', dept: 'Caquetá', lat: -0.6169, lng: -72.3822, colorKey: 'RED', hex: '#ef4444', role: 'Nodo Prioritario Plan Yuruparí (EJC/FAC/ARC) • Concreto MR-45 ($67.723,7 M)' },
-      { oaci: 'SKLP', name: 'La Pedrera', dept: 'Amazonas', lat: -1.3286, lng: -69.5797, colorKey: 'RED', hex: '#ef4444', role: 'Nodo Prioritario Plan Yuruparí (EJC/ARC) • Concreto MR-45 ($67.723,7 M)' },
-      { oaci: 'SKBM', name: 'Barrancominas', dept: 'Guainía', lat: 3.49084, lng: -69.80716, colorKey: 'RED', hex: '#ef4444', role: 'Nodo Prioritario Plan Yuruparí (EJC/ARC) • Concreto MR-45 ($67.723,7 M)' },
+      { oaci: 'SKAC', name: 'Araracuara', dept: 'Caquetá', lat: -0.6169, lng: -72.3822, colorKey: 'RED', hex: '#ef4444', role: 'Nodo Prioridad 1 Plan Yuruparí (EJC/ARC/FAC) • Concreto MR-45 ($67.723,7 M)' },
+      { oaci: 'SKBM', name: 'Barrancominas', dept: 'Guainía', lat: 3.49084, lng: -69.80716, colorKey: 'RED', hex: '#ef4444', role: 'Nodo Prioridad 1 Plan Yuruparí (EJC/ARC/FAC) • Concreto MR-45 ($67.723,7 M)' },
+      { oaci: 'SKRA', name: 'Tarapacá', dept: 'Amazonas', lat: -2.8781, lng: -69.7439, colorKey: 'RED', hex: '#ef4444', role: 'Nodo Prioridad 1 Plan Yuruparí (EJC/ARC/FAC) • Concreto MR-45 ($67.723,7 M)' },
       { oaci: 'SKUC', name: 'Arauca (Santiago Pérez)', dept: 'Arauca', lat: 7.0689, lng: -70.7369, colorKey: 'YELLOW', hex: '#facc15', role: 'Aeródromo Regional de Apoyo Orinoquía Norte' },
       { oaci: 'SKPD', name: 'Puerto Inírida (Obando)', dept: 'Guainía', lat: 3.8536, lng: -67.9061, colorKey: 'YELLOW', hex: '#facc15', role: 'Aeródromo Regional de Apoyo Escudo Guayanés • Pista 2.050×30 m CONPES' },
       { oaci: 'SKSJ', name: 'San José del Guaviare', dept: 'Guaviare', lat: 2.5797, lng: -72.6394, colorKey: 'YELLOW', hex: '#facc15', role: 'Aeródromo Regional de Articulación Guaviare' },
@@ -1346,12 +1423,20 @@
         detail: 'Inversión ARC $62.000 M COP: $14.000 M protección de base, $28.000 M instalaciones habitables y $20.000 M muelle y control de erosión. Articulado con BIPIN45.'
       },
       {
+        name: 'PFA Tarapacá (BFLIM30)',
+        unit: 'BFLIM30 / Fuerza Naval de la Amazonía',
+        river: 'Río Putumayo',
+        lat: -2.8781, lng: -69.7439,
+        invest: true,
+        detail: 'Inversión ARC $26.700 M COP en infraestructura habitable y apoyo fluvial en el eje fronterizo colombo-peruano (Prioridad 1 Plan Yuruparí).'
+      },
+      {
         name: 'Puesto Fluvial La Pedrera (BFLIM30)',
         unit: 'BFLIM30 / Fuerza Naval de la Amazonía',
         river: 'Río Caquetá / Apaporis',
         lat: -1.324, lng: -69.575,
-        invest: true,
-        detail: 'Inversión ARC $26.700 M COP en infraestructura fluvial, habitabilidad y control fronterizo frente a Vila Bittencourt (Brasil).'
+        invest: false,
+        detail: 'Control fluvial fronterizo sobre el eje Caquetá – Apaporis frente a Vila Bittencourt (Brasil).'
       },
       {
         name: 'PFA Amanavén (Estrella Fluvial del Sur)',
@@ -1384,14 +1469,6 @@
         lat: 6.188, lng: -67.482,
         invest: false,
         detail: 'Base principal de operaciones fluviales sobre el eje fronterizo del río Orinoco.'
-      },
-      {
-        name: 'PFA Tarapacá',
-        unit: 'BFLIM30 / FNA',
-        river: 'Río Putumayo',
-        lat: -2.878, lng: -69.744,
-        invest: false,
-        detail: 'Control fluvial en la frontera colombo-peruana y corredor hacia el trapecio amazónico.'
       },
       {
         name: 'Base Naval ARC Leguízamo',
@@ -1560,7 +1637,7 @@
     const regionalAerodromesViability = [
       { oaci: 'SKAC', name: 'Araracuara', status: 'RESTR', label: 'CONPES 4205: Ampliación 1.800×18 m ($17.603 M E&D 2027)' },
       { oaci: 'SKBM', name: 'Barrancominas', status: 'RESTR', label: 'CONPES 4205: Mejoramiento pista 903×17 m' },
-      { oaci: 'SKLP', name: 'La Pedrera', status: 'RESTR', label: 'CONPES 4205 / ASAES: Alerta obstáculo cementerio a 360 m (RAC 14)' },
+      { oaci: 'SKRA', name: 'Tarapacá', status: 'RESTR', label: 'Prioridad 1 Plan Yuruparí / ASAES: Evaluación obstáculos RAC 14 y adecuación pista' },
       { oaci: 'SKNA', name: 'La Macarena', status: 'VIABLE', label: 'CONPES 4205: Ampliación 1.600×30 m, plataforma y cerramiento' },
       { oaci: 'SKPD', name: 'Inírida', status: 'VIABLE', label: 'CONPES 4205: Mejoramiento 2.050×30 m, rodaje y ayudas visuales' },
       { oaci: 'SKAP', name: 'Apiay / Gómez Niño', status: 'VIABLE', label: 'Viable • Realizar coordinación previa FAC', lat: 4.076, lng: -73.562 },
@@ -1649,14 +1726,14 @@
         navaids: 'Proyección FAC: Radioayudas VOR/DME, LOC, GS y estación meteorológica automática AWOS.'
       },
       {
-        baseId: 'lapedrera',
-        name: 'Nodo C4I La Pedrera (ARC / EJC)',
-        lat: -1.3286, lng: -69.5797,
+        baseId: 'tarapaca',
+        name: 'Nodo C4I Tarapacá (ARC / EJC)',
+        lat: -2.8781, lng: -69.7439,
         trunkingInnerKm: 5,
         trunkingOuterKm: 20,
         satDiag: 'Diagnóstico crítico de redundancia; integración HUB multiórbita GEO/LEO para enlace conjunto.',
         sdwan: 'Solución híbrida SD-WAN + Starlink LEO (~$61 M COP) + respaldo energético ($1.093,6 M COP global).',
-        trunkingDetail: 'Red Troncalizada Motorola GTR8000 ESS: 5 km anillo base-pista / 20 km enlace fluvial Caquetá–Apaporis.',
+        trunkingDetail: 'Red Troncalizada Motorola GTR8000 ESS: 5 km anillo base-pista / 20 km enlace fluvial río Putumayo.',
         navaids: 'Proyección FAC: Radioayudas VOR/DME, LOC, GS y estación AWOS.'
       },
       {
@@ -1684,9 +1761,9 @@
         totalSummary: 'Foco EJC + FAC + CONPES 4205'
       },
       {
-        baseId: 'lapedrera',
-        name: 'La Pedrera (SKLP)',
-        lat: -1.3286, lng: -69.5797,
+        baseId: 'tarapaca',
+        name: 'Tarapacá (SKRA)',
+        lat: -2.8781, lng: -69.7439,
         ejc: '$17.949,4 M COP (prorrata 3 fases COING: Seguridad, Redes/PTAP, Habitabilidad)',
         arc: '$26.700,0 M COP (Infraestructura Fluvial ARC)',
         fac: '$67.723,7 M COP prefactibilidad pista MR-45 + Despeje obstáculo RAC 14',
@@ -1703,6 +1780,239 @@
       }
     ];
 
+    // Interpolación Spline Catmull-Rom para curvas suaves y fronteras compartidas exactas
+    function smoothOpenCurve(points, subdivisions = 12) {
+      if (!points || points.length < 2) return points || [];
+      const result = [];
+      for (let i = 0; i < points.length - 1; i++) {
+        const p0 = points[i === 0 ? i : i - 1];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+
+        for (let s = 0; s < subdivisions; s++) {
+          const t = s / subdivisions;
+          const t2 = t * t;
+          const t3 = t2 * t;
+          const lat = 0.5 * (
+            (2 * p1[0]) +
+            (-p0[0] + p2[0]) * t +
+            (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 +
+            (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3
+          );
+          const lng = 0.5 * (
+            (2 * p1[1]) +
+            (-p0[1] + p2[1]) * t +
+            (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 +
+            (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3
+          );
+          result.push([lat, lng]);
+        }
+      }
+      result.push(points[points.length - 1]);
+      return result;
+    }
+
+    // Construcción topológica de las 3 zonas entrelazadas sin brechas ni superposiciones
+    function buildDynamicZones(cfg) {
+      const westCurve = smoothOpenCurve(cfg.westChain, 12);
+      const top1Curve = smoothOpenCurve(cfg.topSeg1, 8);
+      const div1Curve = smoothOpenCurve(cfg.div1Chain, 14);
+      const top2Curve = smoothOpenCurve(cfg.topSeg2, 8);
+      const div2Curve = smoothOpenCurve(cfg.div2Chain, 14);
+      const eastCurve = smoothOpenCurve(cfg.eastChain, 12);
+
+      const zone1Poly = [
+        ...westCurve,
+        ...[...div1Curve].reverse(),
+        ...[...top1Curve].reverse()
+      ];
+
+      const zone2Poly = [
+        ...div1Curve,
+        ...[...div2Curve].reverse(),
+        ...[...top2Curve].reverse()
+      ];
+
+      const zone3Poly = [
+        ...div2Curve,
+        ...[...eastCurve].reverse()
+      ];
+
+      return [
+        { ...cfg.z1Meta, polygon: zone1Poly },
+        { ...cfg.z2Meta, polygon: zone2Poly },
+        { ...cfg.z3Meta, polygon: zone3Poly }
+      ];
+    }
+
+    // Datos Capa 13: Dinámica Operacional (3 Zonas: Estado Actual y Estado Ideal con bordes entrelazados)
+    const dynamicOpsConfig = {
+      ACTUAL: {
+        highPct: '80%',
+        medPct: '15%',
+        lowPct: '5%',
+        // Contorno exterior occidental (Norte Arauca -> Piedemonte -> Putumayo -> Leguízamo)
+        westChain: [
+          [7.08, -72.05], [6.25, -72.18], [5.35, -72.58], [4.35, -73.55],
+          [3.55, -74.20], [2.65, -74.65], [1.85, -75.60], [1.15, -76.60],
+          [0.45, -76.90], [0.05, -75.95], [-0.25, -74.75]
+        ],
+        topSeg1: [[7.08, -72.05], [7.06, -70.65]],
+        // Frontera compartida 1: Zona Verde (80%) <-> Zona Azul (15%)
+        div1Chain: [
+          [7.06, -70.65], [6.45, -71.15], [5.80, -71.75], [5.05, -72.25],
+          [4.25, -72.90], [3.60, -73.20], [2.90, -73.45], [2.15, -73.60],
+          [1.40, -74.35], [0.55, -74.55], [-0.25, -74.75]
+        ],
+        topSeg2: [[7.06, -70.65], [6.95, -70.05]],
+        // Frontera compartida 2: Zona Azul (15%) <-> Zona Roja (5%)
+        div2Chain: [
+          [6.95, -70.05], [6.15, -69.95], [5.35, -70.85], [4.55, -71.25],
+          [3.65, -71.30], [2.65, -71.35], [1.65, -71.65], [0.85, -72.25],
+          [0.25, -73.15], [-0.25, -74.75]
+        ],
+        // Contorno exterior oriental y sur (Arauca -> Puerto Carreño -> Orinoco -> Leticia -> Leguízamo)
+        eastChain: [
+          [6.95, -70.05], [6.22, -67.45], [4.55, -67.75], [3.85, -67.85],
+          [2.65, -67.25], [1.90, -67.05], [1.75, -67.45], [2.15, -69.85],
+          [1.15, -69.85], [0.15, -69.95], [-1.35, -69.45], [-2.85, -69.70],
+          [-4.22, -69.94], [-3.85, -70.35], [-2.55, -70.25], [-2.15, -72.85],
+          [-1.15, -73.85], [-0.25, -74.75]
+        ],
+        z1Meta: { level: 'Dinámica Operacional Alta', pct: '80%', stateLabel: 'Estado Actual', stroke: '#22c55e', fill: '#4ade80' },
+        z2Meta: { level: 'Dinámica Operacional Media', pct: '15%', stateLabel: 'Estado Actual', stroke: '#0ea5e9', fill: '#38bdf8' },
+        z3Meta: { level: 'Dinámica Operacional Baja', pct: '5%', stateLabel: 'Estado Actual', stroke: '#ef4444', fill: '#f87171' }
+      },
+      IDEAL: {
+        highPct: '60%',
+        medPct: '30%',
+        lowPct: '10%',
+        // Contorno exterior occidental (Norte Arauca -> Piedemonte -> Putumayo -> Leguízamo)
+        westChain: [
+          [7.08, -72.05], [6.25, -72.18], [5.35, -72.58], [4.35, -73.55],
+          [3.55, -74.20], [2.65, -74.65], [1.85, -75.60], [1.15, -76.60],
+          [0.45, -76.90], [0.05, -75.95], [-0.25, -74.75]
+        ],
+        topSeg1: [[7.08, -72.05], [7.06, -70.35]],
+        // Frontera compartida 1: Zona Azul (30%) <-> Zona Verde (60%)
+        div1Chain: [
+          [7.06, -70.35], [6.40, -71.05], [5.60, -71.65], [4.70, -72.15],
+          [3.80, -72.75], [2.90, -73.25], [2.00, -73.50], [1.10, -74.15],
+          [0.25, -74.45], [-0.25, -74.75]
+        ],
+        topSeg2: [[7.06, -70.35], [6.20, -69.55]],
+        // Frontera compartida 2: Zona Verde (60%) <-> Zona Roja (10%) (envuelve Barrancominas y Araracuara)
+        div2Chain: [
+          [6.20, -69.55], [5.85, -68.45], [4.75, -68.65], [3.65, -69.15],
+          [2.65, -69.45], [1.65, -69.75], [0.60, -69.95], [-0.45, -70.65],
+          [-1.25, -71.55], [-1.75, -72.45], [-1.15, -73.85], [-0.25, -74.75]
+        ],
+        // Contorno exterior oriental y sur
+        eastChain: [
+          [6.20, -69.55], [6.22, -67.45], [4.55, -67.75], [3.85, -67.85],
+          [2.65, -67.25], [1.90, -67.05], [1.75, -67.45], [2.15, -69.65],
+          [1.15, -69.85], [0.15, -69.95], [-1.35, -69.45], [-2.85, -69.70],
+          [-4.22, -69.94], [-3.85, -70.35], [-2.55, -70.25], [-2.15, -72.85],
+          [-1.15, -73.85], [-0.25, -74.75]
+        ],
+        z1Meta: { level: 'Dinámica Operacional Media', pct: '30%', stateLabel: 'Estado Ideal', stroke: '#0ea5e9', fill: '#38bdf8' },
+        z2Meta: { level: 'Dinámica Operacional Alta', pct: '60%', stateLabel: 'Estado Ideal', stroke: '#22c55e', fill: '#4ade80' },
+        z3Meta: { level: 'Dinámica Operacional Baja', pct: '10%', stateLabel: 'Estado Ideal', stroke: '#ef4444', fill: '#f87171' }
+      }
+    };
+
+    // Datos Capa 14: Despliegue Ejército Nacional (Fuertes, Cantones, Batallones y Bases)
+    const armyDeploymentData = [
+      // 1. FUERTES MILITARES (▲ - 3 Nodos)
+      { category: 'FUERTE', typeLabel: 'Fuerte Militar', name: 'Fuerte Militar de Apiay', location: 'Villavicencio, Meta', unit: 'Sede IV División / Séptima Brigada (BR07)', lat: 4.082, lng: -73.555, detail: 'Centro principal de comando, apoyo logístico y proyección operacional de la IV División hacia los Llanos Orientales y Guaviare.' },
+      { category: 'FUERTE', typeLabel: 'Fuerte Militar', name: 'Fuerte Militar de Larandia', location: 'Florencia, Caquetá', unit: 'Sede VI División / Fuerza de Tarea Conjunta Omega', lat: 1.482, lng: -75.475, detail: 'Complejo militar estratégico del sur del país; centro de planeación y despliegue conjunto hacia Caquetá, Putumayo y Amazonas.' },
+      { category: 'FUERTE', typeLabel: 'Fuerte Militar', name: 'Fuerte Militar de La Macarena', location: 'La Macarena, Meta', unit: 'FUDRA / Comando Específico del Oriente', lat: 2.185, lng: -73.792, detail: 'Nodo de maniobra aeromóvil y control territorial en la bisagra Meta – Caquetá – Guaviare.' },
+
+      // 2. CANTONES MILITARES (★ - 11 Nodos)
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Arauca', location: 'Arauca, Arauca', unit: 'Sede Décima Octava Brigada (BR18) / BI 18', lat: 7.072, lng: -70.742, detail: 'Puesto de mando de la BR18 y el Batallón de Infantería N.º 18 "Gr. Gabriel Revéiz Pizarro" sobre la frontera con Venezuela.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Saravena', location: 'Saravena, Arauca', unit: 'GM 18 "Gr. Gabriel Revéiz Pizarro" / FT Quirón', lat: 6.952, lng: -71.872, detail: 'Cantón táctico del piedemonte araucano para control de corredores estratégicos e infraestructura.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Yopal', location: 'Yopal, Casanare', unit: 'Sede VIII División / BR16 / GM 16', lat: 5.328, lng: -72.392, detail: 'Cuartel General de la Octava División, Décima Sexta Brigada y Grupo de Caballería Montado N.º 16 "Guías del Casanare".' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Puerto Carreño', location: 'Puerto Carreño, Vichada', unit: 'Sede Vigésima Octava Brigada (BR28) / BI 45', lat: 6.178, lng: -67.492, detail: 'Puesto de mando de la BR28 y Batallón de Infantería N.º 45 "Gr. Próspero Pinzón" en la confluencia Meta–Orinoco.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar GAORI / Marandúa', location: 'Cumaribo / Santa Rosalía, Vichada', unit: 'Nodo Conjunto Vichada (BR28 / GAORI)', lat: 5.518, lng: -68.678, detail: 'Instalación conjunta en la altillanura del Vichada para articulación aeroterrestre.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de La Uribe', location: 'La Uribe, Meta', unit: 'BI 29 "Gr. Germán Ocampo Herrera" / BR07', lat: 3.235, lng: -74.342, detail: 'Cantón de control del piedemonte suroccidental del Meta y corredor hacia el Duda–Guayabero.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de San José del Guaviare', location: 'San José del Guaviare, Guaviare', unit: 'Sede Vigésima Segunda Brigada (BR22) / BI 19', lat: 2.568, lng: -72.642, detail: 'Sede de la BR22 y el Batallón de Infantería de Selva N.º 19 "Gr. Joaquín París".' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar La Macarena', location: 'La Macarena, Meta', unit: 'Brigadas Móviles FUDRA', lat: 2.168, lng: -73.775, detail: 'Instalación de apoyo logístico y acuartelamiento de unidades móviles de despliegue rápido.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Mitú', location: 'Mitú, Vaupés', unit: 'Sede Brigada de Selva N.º 31 (BR31) / BIS 30', lat: 1.258, lng: -70.238, detail: 'Cuartel del Batallón de Infantería de Selva N.º 30 "Gr. Alfredo Vásquez Cobo" sobre el río Vaupés.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Puerto Leguízamo', location: 'Puerto Leguízamo, Putumayo', unit: 'BIS 49 "Soldado Juan Bautista Solarte Obando"', lat: -0.192, lng: -74.778, detail: 'Cantón de selva sobre el río Putumayo en triple frontera con Perú y Ecuador.' },
+      { category: 'CANTON', typeLabel: 'Cantón Militar', name: 'Cantón Militar de Leticia', location: 'Leticia, Amazonas', unit: 'Sede Vigésima Sexta Brigada (BR26) / BIS 50', lat: -4.205, lng: -69.938, detail: 'Puesto de mando de la BR26 y Batallón de Infantería de Selva N.º 50 "Gr. Luis Acevedo Torres".' },
+
+      // 3. BATALLONES (⬟ - 28 Unidades Tácticas)
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BATOT 29 (Batallón de Operaciones Terrestres)', location: 'Arauquita, Arauca', unit: 'FT Quirón / VIII División', lat: 7.025, lng: -71.425, detail: 'Control territorial y protección de infraestructura en el eje fronterizo del río Arauca.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BATOT 27 (Batallón de Operaciones Terrestres)', location: 'Fortul, Arauca', unit: 'FT Quirón / VIII División', lat: 6.792, lng: -71.775, detail: 'Operaciones de estabilización en el piedemonte araucano.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BEEV 22 "SV. José Wilber Cortés"', location: 'Tame, Arauca', unit: 'BR18 / VIII División', lat: 6.462, lng: -71.732, detail: 'Batallón Especial Energético y Vial N.º 22 en el cruce de la Troncal del Llano.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'Destacamento Táctico Cravo Norte', location: 'Cravo Norte, Arauca', unit: 'BR18 / VIII División', lat: 6.302, lng: -70.205, detail: 'Control de sabanas inundables en el límite Arauca–Casanare.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BITER 16 (Batallón de Instrucción y Entrenamiento)', location: 'Cupiagua / Aguazul, Casanare', unit: 'BR16 / VIII División', lat: 5.175, lng: -72.555, detail: 'Formación y reentrenamiento operacional de la Décima Sexta Brigada.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 44 "Ramón Nonato Pérez"', location: 'Tauramena, Casanare', unit: 'BR16 / VIII División', lat: 5.018, lng: -72.752, detail: 'Batallón de Infantería del sur de Casanare y corredores hacia el río Meta.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'Escuadrón Mecanizado Paz de Ariporo', location: 'Paz de Ariporo, Casanare', unit: 'GM 16 / BR16', lat: 5.882, lng: -71.892, detail: 'Control de movilidad sobre el eje norte de Casanare.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BIING 28 "Cr. Arturo Herrera Castaño"', location: 'La Primavera, Vichada', unit: 'BR28 / VIII División', lat: 5.485, lng: -70.405, detail: 'Batallón de Ingenieros de Construcción y movilidad en el eje del río Meta.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 43 "Gr. Efraín Rojas Acevedo"', location: 'Cumaribo, Vichada', unit: 'BR28 / VIII División', lat: 4.445, lng: -69.795, detail: 'Batallón de Infantería de Selva en el centro del departamento del Vichada.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BATOT 28 (Batallón de Operaciones Terrestres)', location: 'Puerto Carreño / Casuarito, Vichada', unit: 'BR28 / VIII División', lat: 5.955, lng: -67.555, detail: 'Control fronterizo sobre el eje del río Orinoco.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'Destacamento de Selva Inírida (BI 45)', location: 'Inírida, Guainía', unit: 'BR28 / VIII División', lat: 3.862, lng: -67.922, detail: 'Presencia orgánica terrestre en la capital del Guainía y Estrella Fluvial del Sur.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'Destacamento Guainía Oriental', location: 'Cacahual / Guainía', unit: 'BR28 / VIII División', lat: 3.555, lng: -67.455, detail: 'Vigilancia terrestre en el corredor fronterizo Atabapo–Guainía.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 20 "Gr. Roergas Serviez"', location: 'Villavicencio / Restrepo, Meta', unit: 'BR07 / IV División', lat: 4.245, lng: -73.565, detail: 'Batallón de Infantería del piedemonte norte del Meta.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 21 "Pantano de Vargas"', location: 'Granada, Meta', unit: 'BR07 / IV División', lat: 3.545, lng: -73.708, detail: 'Control territorial en la región del Ariari.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BEEV 15 (Batallón Especial Energético y Vial)', location: 'Puerto Gaitán, Meta', unit: 'BR07 / IV División', lat: 4.315, lng: -72.075, detail: 'Protección de infraestructura petrolera y ejes viales de la altillanura del Meta.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BATOT 5 (Batallón de Operaciones Terrestres)', location: 'Vista Hermosa, Meta', unit: 'FUDRA / IV División', lat: 3.125, lng: -73.752, detail: 'Operaciones de estabilización en el eje Güejar – Sierra de la Macarena.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BATOT 6 (Batallón de Operaciones Terrestres)', location: 'Puerto Rico, Meta', unit: 'BR07 / IV División', lat: 2.938, lng: -73.208, detail: 'Control del corredor fluvial del río Ariari hacia el Guaviare.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BITER 22 (Batallón de Instrucción y Entrenamiento)', location: 'El Retorno, Guaviare', unit: 'BR22 / IV División', lat: 2.332, lng: -72.628, detail: 'Unidad de soporte y control del arco vial San José – Calamar.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 24 "Gr. Luis Carlos Camacho Leyva"', location: 'Calamar, Guaviare', unit: 'BR22 / IV División', lat: 1.958, lng: -72.652, detail: 'Contención de deforestación y corredores en el borde norte del PNN Chiribiquete.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BASMO 51 "Gr. José María Ortega"', location: 'Miraflores, Guaviare', unit: 'BR22 / IV División', lat: 1.338, lng: -71.952, detail: 'Batallón de Selva sobre el alto río Vaupés en el corazón del Guaviare.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 34 "Juanambú"', location: 'Florencia, Caquetá', unit: 'BR12 / VI División', lat: 1.618, lng: -75.608, detail: 'Batallón de Infantería del piedemonte caqueteño.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 35 "Héroes del Güepí"', location: 'Larandia / Montañita, Caquetá', unit: 'BR12 / VI División', lat: 1.445, lng: -75.425, detail: 'Unidad histórica de maniobra en el centro del Caquetá.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 36 "Cazadores"', location: 'San Vicente del Caguán, Caquetá', unit: 'FTC Omega / VI División', lat: 2.115, lng: -74.768, detail: 'Control de la cuenca del río Caguán y Sabanas del Yarí.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BATOT 21 (Batallón de Operaciones Terrestres)', location: 'Cartagena del Chairá / Solano, Caquetá', unit: 'FTC Omega / VI División', lat: 1.332, lng: -74.842, detail: 'Unidad táctica vinculada al corredor Caguán – Caquetá y Araracuara.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BI 25 "Gr. Roberto Domingo Rico"', location: 'Villagarzón, Putumayo', unit: 'BR27 / VI División', lat: 1.028, lng: -76.615, detail: 'Batallón de Infantería del piedemonte amazónico putumayense.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BA 27 "Gr. Luis Ernesto Ordóñez"', location: 'Santana / Puerto Asís, Putumayo', unit: 'BR27 / VI División', lat: 0.515, lng: -76.495, detail: 'Batallón de Artillería y apoyo de combate en el medio Putumayo.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BEEV 9 (Batallón Especial Energético y Vial)', location: 'Orito, Putumayo', unit: 'BR27 / VI División', lat: 0.668, lng: -76.872, detail: 'Seguridad de infraestructura energética en el occidente del Putumayo.' },
+      { category: 'BATALLON', typeLabel: 'Batallón', name: 'BIS 49 Destacamento La Tagua', location: 'La Tagua, Putumayo', unit: 'BR27 / VI División', lat: -0.052, lng: -74.668, detail: 'Control del istmo fluvial entre los ríos Putumayo y Caquetá.' },
+
+      // 4. BASES MILITARES (● - 38 Bases Plan Yuruparí + Bases Adelantadas)
+      { category: 'BASE', typeLabel: 'Base Militar (Plan Yuruparí)', name: 'Base Militar «El Galante»', location: 'Barrancominas, Guainía', unit: 'BIPIN 45 / BR28', lat: 3.49084, lng: -69.80716, detail: 'Extensión: 86 ha • Predio baldío en Reserva Forestal. Nodo Prioridad 1 Plan Yuruparí.' },
+      { category: 'BASE', typeLabel: 'Base Militar (Plan Yuruparí)', name: 'Base Militar «Jineta»', location: 'Mapiripán, Meta', unit: 'BR07 / IV División', lat: 2.892, lng: -72.138, detail: 'Extensión: 140,7 ha • Predio propiedad del Ministerio de Defensa Nacional (MDN).' },
+      { category: 'BASE', typeLabel: 'Base Militar (Plan Yuruparí)', name: 'Base Militar «PMA BASMO 51»', location: 'Miraflores, Guaviare', unit: 'BASMO 51 / BR22', lat: 1.335, lng: -71.945, detail: 'Extensión: 3 ha • Predio baldío. Puesto de Mando Adelantado en Guaviare.' },
+      { category: 'BASE', typeLabel: 'Base Militar (Plan Yuruparí)', name: 'Base Militar «Araracuara»', location: 'Solano, Caquetá', unit: 'BATOT 21 / BILAC 50', lat: -0.6169, lng: -72.3822, detail: 'Extensión: 12 ha (5 ha área núcleo) • Comodato Comunidad Indígena Uitoto Monchoa. Nodo Prioridad 1.' },
+      { category: 'BASE', typeLabel: 'Base Militar (Plan Yuruparí)', name: 'Base Militar «Génesis – San Felipe»', location: 'San Felipe, Guainía', unit: 'BR28 / VIII División', lat: 1.918, lng: -67.072, detail: 'Extensión: 74 ha • Predio baldío en Reserva Forestal sobre el río Negro/Guainía.' },
+      { category: 'BASE', typeLabel: 'Base Militar (Plan Yuruparí)', name: 'Base Militar «BASMIL La Pedrera»', location: 'La Pedrera, Amazonas', unit: 'BILAC 50 / BR26', lat: -1.3286, lng: -69.5797, detail: 'Extensión: 86 ha + 1.690 m² • Predio MDN sobre el bajo río Caquetá.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Tarapacá', location: 'Tarapacá, Amazonas', unit: 'BR26 / VI División', lat: -2.8781, lng: -69.7439, detail: 'Nodo Prioridad 1 Plan Yuruparí sobre el eje fronterizo del río Putumayo.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Tres Esquinas', location: 'Solano, Caquetá', unit: 'BR12 / VI División', lat: 0.745, lng: -75.235, detail: 'Articulación aeroterrestre junto al CACOM-6 en la confluencia Orteguaza–Caquetá.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Nariño', location: 'Puerto Nariño, Amazonas', unit: 'BIS 50 / BR26', lat: -3.772, lng: -70.382, detail: 'Control terrestre en el Trapecio Amazónico sobre el río Amazonas.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Arica', location: 'Puerto Arica, Amazonas', unit: 'BR26 / VI División', lat: -2.145, lng: -71.755, detail: 'Puesto avanzado en el interfluvio Putumayo–Igara Paraná.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada El Encanto', location: 'El Encanto, Amazonas', unit: 'BR26 / VI División', lat: -1.745, lng: -73.208, detail: 'Control del eje medio-bajo del río Putumayo.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Santander', location: 'Puerto Santander, Amazonas', unit: 'BATOT 21 / BILAC 50', lat: -0.625, lng: -72.365, detail: 'Control ribereño frente al raudal de Araracuara.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Taraira', location: 'Taraira, Vaupés', unit: 'BR31 / IV División', lat: -0.562, lng: -69.635, detail: 'Seguridad fronteriza en el bajo río Apaporis / Serranía de Taraira.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Carurú', location: 'Carurú, Vaupés', unit: 'BIS 52 / BR31', lat: 1.012, lng: -71.295, detail: 'Control fluvial sobre el alto río Vaupés.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Esperanza', location: 'Barrancominas Occidental, Guainía', unit: 'BIPIN 45 / BR28', lat: 3.455, lng: -70.185, detail: 'Puesto avanzado de seguridad en el corredor fluvial del río Guaviare.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Nueva Antioquia', location: 'La Primavera, Vichada', unit: 'BR28 / VIII División', lat: 5.955, lng: -69.425, detail: 'Control de sabana y eje del río Meta en el norte de Vichada.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Amanavén', location: 'Cumaribo, Vichada', unit: 'BR28 / VIII División', lat: 4.038, lng: -67.722, detail: 'Vigilancia en la confluencia de los ríos Guaviare, Inírida y Orinoco.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada El Viento', location: 'Cumaribo, Vichada', unit: 'BR28 / VIII División', lat: 4.585, lng: -70.955, detail: 'Control del corredor vial y de sabana entre Meta y Vichada.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Planas', location: 'Puerto Gaitán, Meta', unit: 'BR07 / IV División', lat: 4.185, lng: -71.355, detail: 'Presencia en la altillanura oriental del Meta.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Rubiales', location: 'Puerto Gaitán, Meta', unit: 'BEEV 15 / BR07', lat: 3.815, lng: -71.455, detail: 'Protección de campos energéticos y vías de la altillanura.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada San Pedro de Arimena', location: 'Puerto López, Meta', unit: 'BR07 / IV División', lat: 4.355, lng: -71.885, detail: 'Punto de control al final de la vía pavimentada RN-40.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Cabuyaro', location: 'Cabuyaro, Meta', unit: 'BR07 / IV División', lat: 4.285, lng: -72.795, detail: 'Control del paso sobre el alto río Meta.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Lejanías / Mesetas', location: 'Mesetas, Meta', unit: 'FUDRA / IV División', lat: 3.385, lng: -74.045, detail: 'Seguridad del piedemonte norte de la Sierra de la Macarena.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada San Juan de Arama', location: 'San Juan de Arama, Meta', unit: 'BR07 / IV División', lat: 3.345, lng: -73.885, detail: 'Control de acceso hacia el área de manejo especial La Macarena.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Fuente de Oro', location: 'Fuente de Oro, Meta', unit: 'BI 21 / BR07', lat: 3.462, lng: -73.622, detail: 'Seguridad vial sobre la Troncal de la Selva.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Concordia', location: 'Puerto Concordia, Meta', unit: 'BR07 / IV División', lat: 2.622, lng: -72.758, detail: 'Cabecera norte del puente Nowen sobre el río Guaviare.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Barranco Minas Norte', location: 'Cumaribo Sur, Vichada', unit: 'BR28 / VIII División', lat: 3.725, lng: -70.655, detail: 'Control interfluvial entre los ríos Tomo, Tuparro y Guaviare.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Orocué', location: 'Orocué, Casanare', unit: 'BR16 / VIII División', lat: 4.792, lng: -71.338, detail: 'Control fluvial sobre el río Meta en Casanare.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Hato Corozal', location: 'Hato Corozal, Casanare', unit: 'BR16 / VIII División', lat: 6.155, lng: -71.762, detail: 'Vigilancia en el límite Casanare–Arauca.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Rondón', location: 'Puerto Rondón, Arauca', unit: 'BR18 / VIII División', lat: 6.282, lng: -71.102, detail: 'Control de sabanas centrales del departamento de Arauca.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Cubará', location: 'Cubará, Boyacá / Arauca', unit: 'FT Quirón / VIII División', lat: 7.005, lng: -72.058, detail: 'Seguridad en el corredor norte del piedemonte binacional.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Los Pozos', location: 'San Vicente del Caguán, Caquetá', unit: 'FTC Omega / VI División', lat: 2.385, lng: -74.525, detail: 'Control territorial en el corredor hacia La Macarena.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Rico Caquetá', location: 'Puerto Rico, Caquetá', unit: 'BR12 / VI División', lat: 1.912, lng: -75.158, detail: 'Seguridad vial y piedemonte norte del Caquetá.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Peñas Coloradas', location: 'Cartagena del Chairá, Caquetá', unit: 'FTC Omega / VI División', lat: 1.185, lng: -74.685, detail: 'Control fluvial sobre el bajo río Caguán.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Curillo', location: 'Curillo, Caquetá', unit: 'BR12 / VI División', lat: 1.032, lng: -75.918, detail: 'Control del alto río Caquetá en límite con Putumayo.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Guzmán', location: 'Puerto Guzmán, Putumayo', unit: 'BR27 / VI División', lat: 0.965, lng: -76.402, detail: 'Vigilancia en el corredor fluvial del alto Caquetá.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada Puerto Ospina', location: 'Puerto Leguízamo, Putumayo', unit: 'BIS 49 / BR27', lat: 0.142, lng: -75.832, detail: 'Control fronterizo sobre el río Putumayo frente a Ecuador/Perú.' },
+      { category: 'BASE', typeLabel: 'Base Adelantada', name: 'Base Adelantada La Carmelita', location: 'Puerto Asís, Putumayo', unit: 'BR27 / VI División', lat: 0.385, lng: -76.585, detail: 'Control de corredores rurales del bajo Putumayo.' }
+    ];
+
     // Estado global del visor (Topográfico por defecto y solo Capa 1 activa)
     const CARTO_API_KEY = 'cb1_5bre_1_d0208201307b23c4e5aaee0e';
     let currentUnit = 'NM';
@@ -1717,10 +2027,12 @@
     let telecomFilter = 'ALL';
     let budgetForceFilter = 'ALL';
     let roadFilter = 'ALL';
+    let dynamicState = 'ACTUAL';
+    let armyFilter = 'ALL';
 
     const UNIT_CONFIG = {
-      NM: { label: '40 NM', meters: 40 * 1852, halfMeters: 20 * 1852, kmText: '74,08 km' },
-      MI: { label: '40 MI', meters: 40 * 1609.344, halfMeters: 20 * 1609.344, kmText: '64,37 km' }
+      NM: { label: '90 NM', meters: 90 * 1852, halfMeters: 45 * 1852, kmText: '166,68 km' },
+      MI: { label: '90 MI', meters: 90 * 1609.344, halfMeters: 45 * 1609.344, kmText: '144,84 km' }
     };
 
     // 2. Inicialización del Mapa Leaflet
@@ -1781,6 +2093,7 @@
     }
 
     // 3. Grupos de Capas (solo Capa 1 activa por defecto)
+    const layer13Group = L.layerGroup();
     const layer4Group = L.layerGroup();
     const layer5Group = L.layerGroup();
     const layer6Group = L.layerGroup();
@@ -1792,6 +2105,7 @@
     const layer12Group = L.layerGroup();
     const layer9Group = L.layerGroup();
     const layer7Group = L.layerGroup();
+    const layer14Group = L.layerGroup();
     const distanceGroup = L.layerGroup();
     const layer1Group = L.layerGroup().addTo(map);
 
@@ -1807,10 +2121,11 @@
       9: layer9Group,
       10: layer10Group,
       11: layer11Group,
-      12: layer12Group
+      12: layer12Group,
+      13: layer13Group,
+      14: layer14Group
     };
-
-    // 4. Renderizado de Capa 1: Poblaciones Base
+    // 4. Renderizado de Capa 1: Bases Prioridad 1 (solo Necesidades y Presupuesto)
     const baseMarkersById = {};
     function renderLayer1() {
       layer1Group.clearLayers();
@@ -1831,17 +2146,18 @@
           <div class="space-y-2 text-xs">
             <div class="flex items-center justify-between border-b border-white/15 pb-1.5">
               <div>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-red-300">Base Priorizada • ${node.oaci}</span>
-                <h3 class="text-sm font-bold text-white">${node.name}</h3>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-red-300">${node.priority} • ${node.dept}</span>
+                <h3 class="text-sm font-bold text-white">${node.name} (${node.oaci})</h3>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-red-500/25 border border-red-300/40 text-red-200 font-mono text-[10px]">${node.oaci}</span>
             </div>
-            <p class="text-white/80"><strong class="text-white">Ubicación:</strong> ${node.dept} (${node.coordsText})</p>
-            <p class="text-white/80"><strong class="text-white">Unidades:</strong> ${node.units}</p>
-            <p class="text-white/80"><strong class="text-white">Demografía:</strong> ${node.population}</p>
-            <p class="text-white/80"><strong class="text-white">Economía:</strong> ${node.economy}</p>
-            <div class="p-2 rounded-xl bg-amber-500/15 border border-amber-300/30 text-amber-100 text-[11px]">
-              <strong>Diagnóstico Terreno:</strong> ${node.visitStatus}
+            <div class="p-2 rounded-xl bg-white/[0.06] border border-white/10 text-white/85 text-[11px] leading-relaxed">
+              <strong class="text-sky-300 block mb-0.5">Necesidades:</strong>
+              ${node.needs}
+            </div>
+            <div class="p-2 rounded-xl bg-amber-500/15 border border-amber-300/30 text-amber-100 text-[11px] leading-relaxed">
+              <strong class="text-amber-300 block mb-0.5">Presupuesto:</strong>
+              ${node.budget}
             </div>
           </div>
         `;
@@ -1869,7 +2185,6 @@
       facAerodromesData
         .filter(a => facColorFilter === 'ALL' || a.colorKey === facColorFilter)
         .forEach(aero => {
-          // Anillo externo (40 NM o 40 MI)
           L.circle([aero.lat, aero.lng], {
             radius: cfg.meters,
             color: aero.hex,
@@ -1879,7 +2194,6 @@
             fillOpacity: 0.08
           }).addTo(layer2Group);
 
-          // Anillo intermedio (26.6 mi) y anillo interno (13.3 mi) estilo retícula FAC
           L.circle([aero.lat, aero.lng], {
             radius: cfg.meters * 0.66,
             color: aero.hex,
@@ -1896,7 +2210,6 @@
             fill: false
           }).addTo(layer2Group);
 
-          // 8 radios sectoriales cada 45 grados
           for (let deg = 0; deg < 360; deg += 45) {
             const endPt = destinationPoint(aero.lat, aero.lng, cfg.meters, deg);
             L.polyline([[aero.lat, aero.lng], endPt], {
@@ -1906,7 +2219,6 @@
             }).addTo(layer2Group);
           }
 
-          // Punto central y etiqueta blanca OACI
           const centerMarker = L.circleMarker([aero.lat, aero.lng], {
             radius: 5,
             color: '#ffffff',
@@ -1977,7 +2289,6 @@
         .forEach(river => {
           const curved = generateSmoothRiverCoords(river.coords);
 
-          // Halo exterior luminoso
           L.polyline(curved, {
             color: '#0284c7',
             weight: river.weight + 4,
@@ -1986,7 +2297,6 @@
             lineJoin: 'round'
           }).addTo(layer3Group);
 
-          // Cauce principal
           const line = L.polyline(curved, {
             color: river.color,
             weight: river.weight,
@@ -2186,7 +2496,7 @@
     // 12. Renderizado de Capa 9: Viabilidad Aeródromos Regionales
     function renderViabilityLayer() {
       layer9Group.clearLayers();
-      const baseCoordsMap = { SKAC: [-0.6169, -72.3822], SKBM: [3.49084, -69.80716], SKLP: [-1.3286, -69.5797], SKNA: [2.1792, -73.7875], SKPD: [3.8536, -67.9061] };
+      const baseCoordsMap = { SKAC: [-0.6169, -72.3822], SKBM: [3.49084, -69.80716], SKRA: [-2.8781, -69.7439], SKNA: [2.1792, -73.7875], SKPD: [3.8536, -67.9061] };
 
       regionalAerodromesViability
         .filter(v => viabilityFilter === 'ALL' || v.status === viabilityFilter)
@@ -2258,7 +2568,6 @@
       layer11Group.clearLayers();
       telecomData.forEach(t => {
         if (telecomFilter === 'ALL' || telecomFilter === 'TRUNKING') {
-          // Anillo interno 5 km (cobertura garantizada base/perímetro)
           L.circle([t.lat, t.lng], {
             radius: t.trunkingInnerKm * 1000,
             color: '#38bdf8',
@@ -2267,7 +2576,6 @@
             fillOpacity: 0.22
           }).addTo(layer11Group);
 
-          // Anillo externo 20-22 km (corredor fluvial / línea de vista)
           L.circle([t.lat, t.lng], {
             radius: t.trunkingOuterKm * 1000,
             color: '#7dd3fc',
@@ -2312,7 +2620,7 @@
           badgeBg = 'rgba(6, 78, 59, 0.92)';
           borderCol = '#6ee7b7';
         } else if (budgetForceFilter === 'ARC') {
-          highlightText = inv.baseId === 'araracuara' ? 'ARC: Apoyo BFLIM30' : (inv.baseId === 'lapedrera' ? 'ARC: $26.700 M' : 'ARC: $62.000 M');
+          highlightText = inv.baseId === 'araracuara' ? 'ARC: Apoyo BFLIM30' : (inv.baseId === 'tarapaca' ? 'ARC: $26.700 M' : 'ARC: $62.000 M');
           badgeBg = 'rgba(30, 58, 138, 0.92)';
           borderCol = '#93c5fd';
         } else if (budgetForceFilter === 'FAC') {
@@ -2342,40 +2650,136 @@
       });
     }
 
-    // 16. Renderizado de Líneas de Enlace y Distancias entre Bases
+    // 16. Renderizado de Capa 13: Dinámica Operacional (3 Zonas Suavizadas con Límites Entrelazados)
+    function renderDynamicOpsLayer() {
+      layer13Group.clearLayers();
+      const scenarioCfg = dynamicOpsConfig[dynamicState] || dynamicOpsConfig.ACTUAL;
+      const zones = buildDynamicZones(scenarioCfg);
+
+      zones.forEach(z => {
+        const poly = L.polygon(z.polygon, {
+          color: z.stroke,
+          weight: 1.8,
+          opacity: 0.85,
+          fillColor: z.fill,
+          fillOpacity: 0.34,
+          smoothFactor: 1.0,
+          lineJoin: 'round',
+          lineCap: 'round'
+        });
+
+        poly.bindPopup(`
+          <div class="text-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider" style="color:${z.fill}">${z.stateLabel}</span>
+            <h4 class="text-sm font-bold text-white">${z.level}: ${z.pct}</h4>
+          </div>
+        `);
+        poly.addTo(layer13Group);
+      });
+
+      const pctHigh = document.getElementById('dynPctHigh');
+      const pctMed = document.getElementById('dynPctMed');
+      const pctLow = document.getElementById('dynPctLow');
+      if (pctHigh) pctHigh.textContent = scenarioCfg.highPct;
+      if (pctMed) pctMed.textContent = scenarioCfg.medPct;
+      if (pctLow) pctLow.textContent = scenarioCfg.lowPct;
+    }
+
+    // 17. Renderizado de Capa 14: Despliegue Ejército Nacional (4 Convenciones Moradas)
+    function renderArmyLayer() {
+      layer14Group.clearLayers();
+
+      const filtered = armyDeploymentData.filter(item => {
+        if (armyFilter === 'ALL') return true;
+        if (armyFilter === 'FC') return item.category === 'FUERTE' || item.category === 'CANTON';
+        if (armyFilter === 'BAT') return item.category === 'BATALLON';
+        if (armyFilter === 'BASE') return item.category === 'BASE';
+        return true;
+      });
+
+      filtered.forEach(item => {
+        let svgHtml = '';
+        let size = 18;
+
+        if (item.category === 'FUERTE') {
+          size = 24;
+          svgHtml = `<svg width="24" height="24" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.75));"><polygon points="12,2 22,20 2,20" fill="#7e22ce" stroke="#f5d0fe" stroke-width="1.8"/></svg>`;
+        } else if (item.category === 'CANTON') {
+          size = 22;
+          svgHtml = `<svg width="22" height="22" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.75));"><polygon points="12,2 15,8.5 22,9.3 17,14 18.2,21 12,17.6 5.8,21 7,14 2,9.3 9,8.5" fill="#7e22ce" stroke="#f5d0fe" stroke-width="1.5"/></svg>`;
+        } else if (item.category === 'BATALLON') {
+          size = 18;
+          svgHtml = `<svg width="18" height="18" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.75));"><polygon points="12,2 22,9.5 18.2,21 5.8,21 2,9.5" fill="#6b21a8" stroke="#f3e8ff" stroke-width="1.8"/></svg>`;
+        } else {
+          size = 12;
+          svgHtml = `<svg width="12" height="12" viewBox="0 0 16 16" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.75));"><circle cx="8" cy="8" r="5.5" fill="#7e22ce" stroke="#f5d0fe" stroke-width="1.6"/></svg>`;
+        }
+
+        const marker = L.marker([item.lat, item.lng], {
+          icon: L.divIcon({
+            className: '',
+            html: svgHtml,
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2]
+          })
+        });
+
+        marker.bindPopup(`
+          <div class="text-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase text-fuchsia-300">${item.typeLabel} • ${item.location}</span>
+            <h4 class="text-sm font-bold text-white">${item.name}</h4>
+            <div class="text-fuchsia-200 font-semibold text-[11px]">${item.unit}</div>
+            <p class="text-white/80 leading-relaxed pt-0.5">${item.detail}</p>
+          </div>
+        `);
+        marker.addTo(layer14Group);
+      });
+    }
+
+    // 18. Renderizado de Líneas de Enlace y Distancias entre Bases
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
     function renderDistances() {
       distanceGroup.clearLayers();
       const pairs = [
         [nodesData[0], nodesData[1]],
-        [nodesData[0], nodesData[2]],
-        [nodesData[1], nodesData[2]]
+        [nodesData[1], nodesData[2]],
+        [nodesData[0], nodesData[2]]
       ];
+
       pairs.forEach(([a, b]) => {
-        const line = L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {
-          color: '#7dd3fc',
+        if (!a || !b) return;
+        const km = haversineKm(a.lat, a.lng, b.lat, b.lng);
+        const nm = km / 1.852;
+        const midLat = (a.lat + b.lat) / 2;
+        const midLng = (a.lng + b.lng) / 2;
+
+        L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {
+          color: '#38bdf8',
           weight: 2,
           dashArray: '6, 6',
           opacity: 0.85
         }).addTo(distanceGroup);
 
-        const meters = map.distance([a.lat, a.lng], [b.lat, b.lng]);
-        const nm = (meters / 1852).toFixed(0);
-        const km = (meters / 1000).toFixed(0);
-        const midLat = (a.lat + b.lat) / 2;
-        const midLng = (a.lng + b.lng) / 2;
-
         L.marker([midLat, midLng], {
           icon: L.divIcon({
             className: '',
-            html: `<div class="distance-label">${nm} NM (${km} km)</div>`,
-            iconSize: [110, 22],
-            iconAnchor: [55, 11]
+            html: `<div class="distance-label">${Math.round(km)} km • ${Math.round(nm)} NM</div>`,
+            iconSize: [120, 22],
+            iconAnchor: [60, 11]
           })
         }).addTo(distanceGroup);
       });
     }
 
-    // 17. Controles de Capas, Filtros y Sincronización UI
     function toggleLayer(num) {
       const cb = document.getElementById(`toggleLayer${num}`);
       const group = layerGroupsMap[num];
@@ -2416,7 +2820,7 @@
     }
 
     function activateOnlyLayer1() {
-      for (let i = 1; i <= 12; i++) {
+      for (let i = 1; i <= 14; i++) {
         const cb = document.getElementById(`toggleLayer${i}`);
         const group = layerGroupsMap[i];
         if (!cb || !group) continue;
@@ -2438,7 +2842,7 @@
 
     function updateActiveLayersCounter() {
       let count = 0;
-      for (let i = 1; i <= 12; i++) {
+      for (let i = 1; i <= 14; i++) {
         if (document.getElementById(`toggleLayer${i}`)?.checked) count++;
       }
       const panelCounter = document.getElementById('activeLayersCount');
@@ -2448,7 +2852,7 @@
     }
 
     function syncIslandChipsState() {
-      for (let i = 1; i <= 12; i++) {
+      for (let i = 1; i <= 14; i++) {
         const cb = document.getElementById(`toggleLayer${i}`);
         const chip = document.getElementById(`chip-layer-${i}`);
         if (cb && chip) {
@@ -2456,7 +2860,7 @@
         }
       }
       const distCb = document.getElementById('toggleDistances');
-      const distChip = document.getElementById('chip-distances');
+      const distChip = document.getElementById(`chip-distances`);
       if (distCb && distChip) {
         distChip.classList.toggle('active', distCb.checked);
       }
@@ -2550,6 +2954,32 @@
       renderRoadsLayer();
     }
 
+    function setDynamicState(state) {
+      dynamicState = state;
+      updateSegmentedButtons('.dyn-btn', `dyn-${state}`, 'py-1.5 px-2 text-xs font-semibold bg-emerald-400 text-slate-950 seg-active-pill transition', 'py-1.5 px-2 text-xs font-medium text-white/75 hover:text-white rounded-lg transition');
+      renderDynamicOpsLayer();
+      if (!map.hasLayer(layer13Group)) {
+        const cb = document.getElementById('toggleLayer13');
+        if (cb) {
+          cb.checked = true;
+          toggleLayer(13);
+        }
+      }
+    }
+
+    function setArmyFilter(val) {
+      armyFilter = val;
+      updateSegmentedButtons('.ejc-btn', `ejc-${val}`, 'py-1 px-1 text-[10px] font-semibold bg-fuchsia-500 text-white seg-active-pill transition', 'py-1 px-1 text-[10px] font-medium text-white/75 hover:text-white rounded-lg transition');
+      renderArmyLayer();
+      if (!map.hasLayer(layer14Group)) {
+        const cb = document.getElementById('toggleLayer14');
+        if (cb) {
+          cb.checked = true;
+          toggleLayer(14);
+        }
+      }
+    }
+
     function focusNode(id) {
       const node = nodesData.find(n => n.id === id);
       if (!node) return;
@@ -2629,6 +3059,8 @@
       renderGaoLayer();
       renderTelecomLayer();
       renderInvestmentLayer();
+      renderDynamicOpsLayer();
+      renderArmyLayer();
       renderDistances();
 
       updateActiveLayersCounter();
