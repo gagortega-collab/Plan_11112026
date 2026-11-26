@@ -105,33 +105,35 @@
       transform: scale(0.97);
     }
 
-    /* Sliders personalizados estilo iOS */
+    /* Sliders personalizados estilo iOS (optimizados para uso táctil en sala y tablet) */
     input[type="range"].ios-slider {
       -webkit-appearance: none;
       appearance: none;
       width: 100%;
-      height: 8px;
+      height: 12px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.16);
       outline: none;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+      touch-action: pan-y;
     }
 
     input[type="range"].ios-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #ffffff 0%, #dbeafe 70%, #93c5fd 100%);
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.4);
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.55), 0 0 10px rgba(255, 255, 255, 0.45);
       transition: transform 0.15s ease;
     }
 
-    input[type="range"].ios-slider::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
+    input[type="range"].ios-slider::-webkit-slider-thumb:hover,
+    input[type="range"].ios-slider::-webkit-slider-thumb:active {
+      transform: scale(1.16);
     }
 
     /* Núcleo Líquido Cambiante Central */
@@ -203,9 +205,65 @@
       100% { border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%; }
     }
 
+    @keyframes morphLiquidUnstable {
+      0% { border-radius: 32% 68% 64% 36% / 62% 34% 66% 38%; }
+      25% { border-radius: 68% 32% 38% 62% / 36% 68% 32% 64%; }
+      50% { border-radius: 40% 60% 70% 30% / 65% 35% 60% 40%; }
+      75% { border-radius: 64% 36% 30% 70% / 34% 62% 38% 66%; }
+      100% { border-radius: 32% 68% 64% 36% / 62% 34% 66% 38%; }
+    }
+
     @keyframes pulseCore {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.035); }
+    }
+
+    @keyframes pulseCoreWarning {
+      0%, 100% { transform: scale(0.98) rotate(-1.5deg); }
+      50% { transform: scale(1.055) rotate(1.5deg); }
+    }
+
+    @keyframes pulseCoreCritical {
+      0% { transform: scale(0.95) translate(-2px, 1px) rotate(-3deg); }
+      25% { transform: scale(1.08) translate(2px, -2px) rotate(2.5deg); }
+      50% { transform: scale(0.96) translate(-1px, -2px) rotate(-2deg); }
+      75% { transform: scale(1.07) translate(2px, 2px) rotate(3deg); }
+      100% { transform: scale(0.95) translate(-2px, 1px) rotate(-3deg); }
+    }
+
+    /* Estados de estabilidad del Núcleo Central */
+    .liquid-core.core-stable {
+      animation: morphLiquid 8.5s ease-in-out infinite, pulseCore 4s ease-in-out infinite;
+    }
+
+    .liquid-core.core-moderate {
+      animation: morphLiquid 3.4s ease-in-out infinite, pulseCoreWarning 1.8s ease-in-out infinite;
+    }
+
+    .liquid-core.core-critical {
+      animation: morphLiquidUnstable 1.35s ease-in-out infinite, pulseCoreCritical 0.65s ease-in-out infinite;
+    }
+
+    .core-ring.ring-moderate {
+      animation: spinSlow 9s linear infinite;
+      border-color: rgba(245, 158, 11, 0.55);
+    }
+
+    .core-ring.ring-critical {
+      animation: spinSlow 3.5s linear infinite;
+      border-color: rgba(239, 68, 68, 0.85);
+      border-width: 2px;
+    }
+
+    .core-ring-inner.ring-moderate {
+      animation: spinReverse 6s linear infinite;
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+
+    .core-ring-inner.ring-critical {
+      animation: spinReverse 2.2s linear infinite;
+      border-color: rgba(239, 68, 68, 0.75);
+      border-width: 2px;
     }
 
     @keyframes spinSlow {
@@ -218,15 +276,47 @@
       to { transform: rotate(0deg); }
     }
 
-    /* Flujo animado en conector de Sincronización */
-    .sync-stream {
-      background-size: 200% 100%;
-      animation: flowGradient 3s linear infinite;
+    /* Animación de Rayo de Plasma en conectores de Sincronización */
+    .plasma-bolt-main {
+      stroke-dasharray: 28 14 10 16;
+      animation: plasmaArcFlow 1.1s linear infinite, plasmaJitter 0.35s ease-in-out infinite alternate;
     }
 
-    @keyframes flowGradient {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
+    .plasma-bolt-secondary {
+      stroke-dasharray: 18 22 8 18;
+      animation: plasmaArcFlowReverse 0.85s linear infinite, plasmaJitter 0.25s ease-in-out infinite alternate-reverse;
+    }
+
+    .plasma-bolt-core {
+      stroke-dasharray: 42 18 12 20;
+      animation: plasmaArcFlow 0.75s linear infinite;
+    }
+
+    .plasma-critical .plasma-bolt-main {
+      animation-duration: 0.42s, 0.14s;
+    }
+
+    .plasma-critical .plasma-bolt-secondary {
+      animation-duration: 0.32s, 0.12s;
+    }
+
+    .plasma-moderate .plasma-bolt-main {
+      animation-duration: 0.72s, 0.22s;
+    }
+
+    @keyframes plasmaArcFlow {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -136; }
+    }
+
+    @keyframes plasmaArcFlowReverse {
+      0% { stroke-dashoffset: -136; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes plasmaJitter {
+      0% { transform: translateY(-0.7px); opacity: 0.85; }
+      100% { transform: translateY(0.7px); opacity: 1; }
     }
 
     /* Scrollbar sutil */
@@ -244,65 +334,61 @@
     }
   </style>
 </head>
-<body class="p-3 sm:p-5 lg:p-6 select-none">
+<body class="p-3 sm:p-5">
+  <!-- Orbes ambientales de fondo -->
+  <div class="ambient-orb w-96 h-96 bg-sky-500/30 top-[-60px] left-[-60px]"></div>
+  <div class="ambient-orb w-[460px] h-[460px] bg-emerald-500/20 bottom-[-80px] right-[-60px]" style="animation-delay: -6s;"></div>
 
-  <!-- Orbes de luz ambiental -->
-  <div class="ambient-orb w-96 h-96 bg-blue-500/30 top-[-60px] left-[-60px]"></div>
-  <div class="ambient-orb w-[28rem] h-[28rem] bg-emerald-500/20 bottom-[-80px] right-[-40px]" style="animation-delay: -6s;"></div>
-  <div class="ambient-orb w-80 h-80 bg-amber-500/20 top-[40%] left-[42%]" style="animation-delay: -11s;"></div>
+  <div class="relative z-10 max-w-[1800px] mx-auto space-y-3.5">
 
-  <div class="relative z-10 max-w-[1600px] mx-auto space-y-4">
-
-    <!-- ENCABEZADO INSTITUCIONAL COGFM + ESCENARIOS RÁPIDOS -->
-    <header class="liquid-glass rounded-3xl p-4 sm:px-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-      <div class="flex items-center gap-3.5">
-        <!-- Emblema SVG Fuerza Conjunta -->
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400/30 via-blue-500/30 to-emerald-500/30 border border-white/30 flex items-center justify-center shadow-lg shrink-0">
-          <svg class="w-7 h-7 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
-            <path d="M12 7l1.5 3 3.3.5-2.4 2.3.6 3.2-3-1.6-3 1.6.6-3.2-2.4-2.3 3.3-.5L12 7z" fill="currentColor" fill-opacity="0.35"/>
-          </svg>
+    <!-- ENCABEZADO INSTITUCIONAL COGFM + ESCENARIOS RÁPIDOS + VERSIÓN -->
+    <header class="liquid-glass rounded-3xl p-4 sm:px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3.5">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[11px] uppercase tracking-widest font-bold px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-sky-200">
+            COGFM · Departamento Conjunto de Planeación (CGDJ5)
+          </span>
+          <span id="global-status-pill" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border">
+            Estado: Óptimo
+          </span>
         </div>
-        <div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[11px] uppercase tracking-widest font-bold px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-sky-200">
-              COGFM · Planeación Estratégica Conjunta
-            </span>
-            <span id="global-status-pill" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border">
-              Estado: Óptimo
-            </span>
-          </div>
-          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white mt-0.5">
-            Simulador de Planeación por Capacidades y Prospectiva (PES · PEI · PEMT)
-          </h1>
-        </div>
+        <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white mt-0.5">
+          Simulador de Planeación por Capacidades y Prospectiva (PES · PEI · PEMT)
+        </h1>
       </div>
 
-      <!-- Botones de Escenarios y Acciones -->
-      <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
-        <span class="text-xs text-slate-300 mr-1 hidden sm:inline">Escenarios:</span>
-        <button onclick="applyScenario('base')" class="glass-pill text-xs font-medium px-3 py-2 rounded-2xl text-white flex items-center gap-1.5">
-          <span>⚖️</span> Base Actual
-        </button>
-        <button onclick="applyScenario('recorte')" class="glass-pill text-xs font-medium px-3 py-2 rounded-2xl text-rose-200 flex items-center gap-1.5">
-          <span>📉</span> Restricción Presupuestal
-        </button>
-        <button onclick="applyScenario('operacional')" class="glass-pill text-xs font-medium px-3 py-2 rounded-2xl text-amber-200 flex items-center gap-1.5">
-          <span>🎯</span> Priorización Misional
-        </button>
-        <button onclick="applyScenario('optimo')" class="glass-pill text-xs font-medium px-3 py-2 rounded-2xl text-emerald-200 flex items-center gap-1.5">
-          <span>🚀</span> Alineación Óptima
-        </button>
+      <!-- Botones de Escenarios y Versión de Implementación -->
+      <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs text-slate-300 mr-0.5 hidden xl:inline">Escenarios:</span>
+          <button onclick="applyScenario('base')" class="glass-pill text-xs font-semibold px-3.5 py-2.5 min-h-[38px] rounded-2xl text-white">
+            Base Actual
+          </button>
+          <button onclick="applyScenario('recorte')" class="glass-pill text-xs font-semibold px-3.5 py-2.5 min-h-[38px] rounded-2xl text-rose-200">
+            Restricción Presupuestal
+          </button>
+          <button onclick="applyScenario('operacional')" class="glass-pill text-xs font-semibold px-3.5 py-2.5 min-h-[38px] rounded-2xl text-amber-200">
+            Priorización Misional
+          </button>
+          <button onclick="applyScenario('optimo')" class="glass-pill text-xs font-semibold px-3.5 py-2.5 min-h-[38px] rounded-2xl text-emerald-200">
+            Alineación Óptima
+          </button>
+        </div>
+
+        <!-- Versión tenue sin cuadro en esquina superior derecha -->
+        <span class="text-[11px] font-medium tracking-widest text-white/30 select-none shrink-0 ml-2" title="Versión de implementación actual">
+          v8.0
+        </span>
       </div>
     </header>
 
-    <!-- ZONA SUPERIOR: TÍTULOS DE LÍNEAS UNIDOS POR "SINCRONIZACIÓN" -->
-    <section class="liquid-glass rounded-3xl p-4 sm:px-6">
-      <div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-4">
+    <!-- ZONA SUPERIOR: TÍTULOS DE LÍNEAS UNIDOS POR "SINCRONIZACIÓN" (PANORÁMICO EN TABLET HORIZONTAL) -->
+    <section class="liquid-glass rounded-3xl p-3.5 sm:px-5">
+      <div class="grid grid-cols-1 md:grid-cols-12 items-center gap-3">
         <!-- Título Línea Institucional -->
-        <div class="lg:col-span-4 flex items-center justify-between lg:justify-start gap-3 bg-white/5 border border-white/15 rounded-2xl p-3">
+        <div class="md:col-span-4 flex items-center justify-between md:justify-start gap-3 bg-white/5 border border-white/15 rounded-2xl p-3">
           <div class="flex items-center gap-3">
-            <div id="inst-header-dot" class="w-3.5 h-3.5 rounded-full shadow-lg"></div>
+            <div id="inst-header-dot" class="w-3.5 h-3.5 rounded-full shadow-lg shrink-0"></div>
             <div>
               <h2 class="text-sm sm:text-base font-bold tracking-wide text-white uppercase">Línea Institucional</h2>
               <p class="text-xs text-slate-300">Soporte, Gobernanza y Gestión (PEI · PAA · PETI)</p>
@@ -313,11 +399,13 @@
           </div>
         </div>
 
-        <!-- Conector Central: SINCRONIZACIÓN -->
-        <div class="lg:col-span-4 flex flex-col items-center justify-center px-2">
-          <div class="w-full flex items-center gap-2">
-            <div id="sync-line-left" class="h-2 flex-1 rounded-full sync-stream transition-all duration-500"></div>
-            <div id="sync-badge-box" class="px-4 py-2 rounded-2xl border backdrop-blur-xl flex flex-col items-center min-w-[195px] shadow-lg transition-all duration-500">
+        <!-- Conector Central: SINCRONIZACIÓN CON RAYOS DE PLASMA -->
+        <div class="md:col-span-4 flex flex-col items-center justify-center px-1">
+          <div class="w-full flex items-center gap-1.5">
+            <!-- Rayo de Plasma Izquierdo (generado dinámicamente) -->
+            <div id="sync-plasma-left" class="flex-1 h-8 flex items-center overflow-visible"></div>
+
+            <div id="sync-badge-box" class="px-3.5 py-2 rounded-2xl border backdrop-blur-xl flex flex-col items-center min-w-[175px] shadow-lg transition-all duration-500 z-10">
               <div class="flex items-center gap-1.5">
                 <span id="sync-dot" class="w-2.5 h-2.5 rounded-full animate-ping"></span>
                 <span class="text-[11px] font-extrabold tracking-widest uppercase text-white">Sincronización</span>
@@ -327,51 +415,53 @@
                 <span id="sync-label" class="text-[11px] font-semibold">Calculando...</span>
               </div>
             </div>
-            <div id="sync-line-right" class="h-2 flex-1 rounded-full sync-stream transition-all duration-500"></div>
+
+            <!-- Rayo de Plasma Derecho (generado dinámicamente) -->
+            <div id="sync-plasma-right" class="flex-1 h-8 flex items-center overflow-visible"></div>
           </div>
-          <p id="sync-detail-text" class="text-[11px] text-slate-300 mt-1.5 text-center">
+          <p id="sync-detail-text" class="text-[11px] text-slate-300 mt-1 text-center">
             Brecha Institucional vs. Misional: 0%
           </p>
         </div>
 
         <!-- Título Línea Misional -->
-        <div class="lg:col-span-4 flex items-center justify-between lg:justify-end gap-3 bg-white/5 border border-white/15 rounded-2xl p-3">
-          <div class="text-left lg:text-right">
+        <div class="md:col-span-4 flex items-center justify-between md:justify-end gap-3 bg-white/5 border border-white/15 rounded-2xl p-3">
+          <div class="text-left md:text-right">
             <h2 class="text-sm sm:text-base font-bold tracking-wide text-white uppercase">Línea Misional</h2>
             <p class="text-xs text-slate-300">Capacidades Conjuntas y Operaciones (PES · PEMT)</p>
           </div>
           <div class="flex items-center gap-3">
             <span id="mis-avg-badge" class="text-base font-extrabold px-2.5 py-1 rounded-xl bg-white/10 border border-white/20">0%</span>
-            <div id="mis-header-dot" class="w-3.5 h-3.5 rounded-full shadow-lg"></div>
+            <div id="mis-header-dot" class="w-3.5 h-3.5 rounded-full shadow-lg shrink-0"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ZONA CENTRAL: PLANES/PROYECTOS + NÚCLEO CAMBIANTE + INSPECTOR DE VARIABLES (2 COLUMNAS DERECHA) -->
-    <main class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
+    <!-- ZONA CENTRAL: PLANES/PROYECTOS + NÚCLEO CAMBIANTE + INSPECTOR DE VARIABLES (OPTIMIZADO PARA SALA Y TABLET LANDSCAPE) -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
-      <!-- COLUMNA IZQUIERDA (7 cols en XL): LAS DOS LÍNEAS DE PLANES Y NÚCLEO EN EL CENTRO -->
-      <div class="xl:col-span-7 flex flex-col gap-4">
+      <!-- COLUMNA IZQUIERDA (7 cols desde lg/tablet horizontal): LAS DOS LÍNEAS DE PLANES Y NÚCLEO EN EL CENTRO -->
+      <div class="lg:col-span-7 flex flex-col gap-3.5">
 
-        <!-- FILA DE PLANES LÍNEA INSTITUCIONAL (5 TARJETAS) -->
-        <div class="liquid-glass rounded-3xl p-4">
-          <div class="flex items-center justify-between mb-3">
+        <!-- FILA DE PLANES LÍNEA INSTITUCIONAL (5 TARJETAS EN PARALELO EN TABLET HORIZONTAL) -->
+        <div class="liquid-glass rounded-3xl p-3.5 sm:p-4">
+          <div class="flex items-center justify-between mb-2.5">
             <div class="flex items-center gap-2">
               <span class="w-2 h-5 rounded-full bg-sky-400"></span>
               <h3 class="text-xs font-bold uppercase tracking-wider text-sky-200">Planes y Proyectos · Línea Institucional</h3>
             </div>
-            <button onclick="openAddPlanModal('institucional')" class="glass-pill text-[11px] font-semibold px-2.5 py-1 rounded-xl text-sky-200 hover:text-white">
+            <button onclick="openAddPlanModal('institucional')" class="glass-pill text-xs font-semibold px-3 py-1.5 min-h-[34px] rounded-xl text-sky-200 hover:text-white">
               + Agregar Plan
             </button>
           </div>
-          <div id="institucional-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div id="institucional-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
             <!-- Renderizado dinámico JS -->
           </div>
         </div>
 
         <!-- CENTRO: NÚCLEO CAMBIANTE ACTUAL (CENTRO DE GRAVEDAD ESTRATÉGICO) -->
-        <div class="liquid-glass rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-5 relative overflow-hidden">
+        <div class="liquid-glass rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
           <!-- Métrica lateral izquierda del núcleo -->
           <div class="flex-1 space-y-2 text-center md:text-left z-10">
             <span class="text-[11px] uppercase tracking-widest font-bold text-slate-300">Centro de Gravedad Estratégico</span>
@@ -393,9 +483,9 @@
 
           <!-- ORBE LÍQUIDO CENTRAL -->
           <div class="core-orb-wrapper shrink-0 z-10" onclick="toggleCoreDiagnostics()" title="Haz clic para ver diagnóstico ejecutivo del núcleo">
-            <div class="core-ring"></div>
-            <div class="core-ring-inner"></div>
-            <div id="liquid-core-orb" class="liquid-core">
+            <div id="core-outer-ring" class="core-ring"></div>
+            <div id="core-inner-ring" class="core-ring-inner"></div>
+            <div id="liquid-core-orb" class="liquid-core core-stable">
               <span class="text-[10px] font-bold uppercase tracking-widest text-white/90 drop-shadow">Núcleo Actual</span>
               <span id="core-score-text" class="text-3xl font-black text-white drop-shadow-md">0%</span>
               <span id="core-state-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/30 text-white mt-1 backdrop-blur-md">
@@ -430,26 +520,26 @@
           </div>
         </div>
 
-        <!-- FILA DE PLANES LÍNEA MISIONAL (5 TARJETAS) -->
-        <div class="liquid-glass rounded-3xl p-4">
-          <div class="flex items-center justify-between mb-3">
+        <!-- FILA DE PLANES LÍNEA MISIONAL (5 TARJETAS EN PARALELO EN TABLET HORIZONTAL) -->
+        <div class="liquid-glass rounded-3xl p-3.5 sm:p-4">
+          <div class="flex items-center justify-between mb-2.5">
             <div class="flex items-center gap-2">
               <span class="w-2 h-5 rounded-full bg-amber-400"></span>
               <h3 class="text-xs font-bold uppercase tracking-wider text-amber-200">Planes y Proyectos · Línea Misional</h3>
             </div>
-            <button onclick="openAddPlanModal('misional')" class="glass-pill text-[11px] font-semibold px-2.5 py-1 rounded-xl text-amber-200 hover:text-white">
+            <button onclick="openAddPlanModal('misional')" class="glass-pill text-xs font-semibold px-3 py-1.5 min-h-[34px] rounded-xl text-amber-200 hover:text-white">
               + Agregar Plan
             </button>
           </div>
-          <div id="misional-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div id="misional-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
             <!-- Renderizado dinámico JS -->
           </div>
         </div>
 
       </div>
 
-      <!-- COLUMNA DERECHA (5 cols en XL): PANEL DE VARIABLES DEL PLAN + VARIABLES DE MEJORAMIENTO -->
-      <aside class="xl:col-span-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- COLUMNA DERECHA (5 cols desde lg/tablet horizontal): PANEL DE VARIABLES DEL PLAN + VARIABLES DE MEJORAMIENTO -->
+      <aside class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
 
         <!-- SUBPANEL 1: VARIABLES DEL PLAN O PROYECTO SELECCIONADO -->
         <div class="liquid-glass rounded-3xl p-4 flex flex-col justify-between">
@@ -467,11 +557,11 @@
               <div class="flex items-center justify-between gap-2">
                 <label class="text-[11px] text-slate-300 font-medium">Nombre del Plan:</label>
                 <input id="edit-plan-name" type="text" oninput="updateSelectedPlanName(this.value)"
-                  class="bg-black/30 border border-white/20 rounded-xl px-2.5 py-1 text-xs text-white w-44 focus:outline-none focus:border-sky-400" />
+                  class="bg-black/30 border border-white/20 rounded-xl px-2.5 py-1.5 text-xs text-white w-44 focus:outline-none focus:border-sky-400" />
               </div>
 
               <div>
-                <div class="flex justify-between text-xs mb-1">
+                <div class="flex justify-between text-xs mb-1.5">
                   <span class="text-slate-300">Avance Global del Plan</span>
                   <span id="selected-plan-progress-label" class="font-bold text-white">0%</span>
                 </div>
@@ -496,7 +586,7 @@
                 <span class="text-[11px] font-semibold text-slate-300">Factores / Variables Internas:</span>
                 <span class="text-[10px] text-slate-400">Toca una para mejorar</span>
               </div>
-              <div id="plan-variables-list" class="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+              <div id="plan-variables-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
                 <!-- Variables dinámicas -->
               </div>
             </div>
@@ -504,8 +594,8 @@
 
           <div class="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-300">
             <span>Línea: <strong id="selected-plan-line" class="uppercase text-white">-</strong></span>
-            <button onclick="recalculatePlanFromVariables()" class="glass-pill px-2.5 py-1 rounded-xl text-[11px] font-semibold text-sky-200">
-              ↻ Sincronizar desde Variables
+            <button onclick="recalculatePlanFromVariables()" class="glass-pill px-3 py-1.5 min-h-[34px] rounded-xl text-[11px] font-semibold text-sky-200">
+              ↻ Sincronizar Variables
             </button>
           </div>
         </div>
@@ -531,15 +621,15 @@
               <span class="text-[11px] font-semibold text-slate-300 block mb-2">
                 Acciones de Mejoramiento (Impacto Directo):
               </span>
-              <div id="improvement-levers-list" class="space-y-2.5 max-h-[370px] overflow-y-auto pr-1">
+              <div id="improvement-levers-list" class="space-y-2.5 max-h-[410px] overflow-y-auto pr-1">
                 <!-- Palancas dinámicas -->
               </div>
             </div>
           </div>
 
           <div class="mt-3 pt-2.5 border-t border-white/10">
-            <button onclick="boostSelectedVariable()" class="w-full py-2.5 px-3 rounded-2xl font-bold text-xs text-white bg-gradient-to-r from-emerald-500/40 to-sky-500/40 hover:from-emerald-500/60 hover:to-sky-500/60 border border-white/30 shadow-lg transition-all flex items-center justify-center gap-2">
-              <span>⚡</span> Aplicar Plan de Choque (+15% a Variable)
+            <button onclick="boostSelectedVariable()" class="w-full py-3 px-3 min-h-[42px] rounded-2xl font-bold text-xs text-white bg-gradient-to-r from-emerald-500/40 to-sky-500/40 hover:from-emerald-500/60 hover:to-sky-500/60 border border-white/30 shadow-lg transition-all flex items-center justify-center">
+              Aplicar Plan de Choque (+15% a Variable)
             </button>
           </div>
         </div>
@@ -547,22 +637,20 @@
       </aside>
     </main>
 
-    <!-- ZONA INFERIOR: EQUILIBRIO + LÍNEA DE TIEMPO PROSPECTIVA (1 A 20 AÑOS) -->
+    <!-- ZONA INFERIOR: EQUILIBRIO + LÍNEA DE TIEMPO PROSPECTIVA (1 A 4 AÑOS) -->
     <section class="liquid-glass rounded-3xl p-4 sm:p-5 space-y-4">
 
       <!-- BARRA SUPERIOR DE LA LÍNEA DE TIEMPO: "EQUILIBRIO" -->
       <div class="flex flex-col md:flex-row items-center justify-between gap-3 pb-3 border-b border-white/15">
         <div class="flex items-center gap-3">
-          <div id="eq-icon-box" class="w-10 h-10 rounded-2xl flex items-center justify-center border border-white/25 shadow-md">
-            <span class="text-lg">⚖️</span>
-          </div>
+          <div id="eq-indicator-dot" class="w-3.5 h-3.5 rounded-full shadow-lg shrink-0"></div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-white">Equilibrio Estratégico y Sostenibilidad</h3>
+              <h3 class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-white">Equilibrio Estratégico y Sostenibilidad (Cuatrienio)</h3>
               <span id="eq-status-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full border">0%</span>
             </div>
             <p id="eq-description" class="text-xs text-slate-300">
-              Balance entre ejecución inmediata (1–5 años) y sostenimiento de capacidades a largo plazo (6–20 años).
+              Balance entre arranque inmediato (Año 1) y consolidación de capacidades al cierre del cuatrienio (Año 4).
             </p>
           </div>
         </div>
@@ -571,52 +659,52 @@
         <div class="flex flex-wrap items-center gap-3 text-[11px]">
           <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
             <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
-            <span class="text-slate-300">Crítico (&lt;50%)</span>
+            <span class="text-slate-300">Crítico / Inestable (&lt;50%)</span>
           </div>
           <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-            <span class="text-slate-300">En Transición (50–74%)</span>
+            <span class="text-slate-300">Moderado (50–74%)</span>
           </div>
           <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-white/10">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <span class="text-slate-300">Óptimo (≥75%)</span>
+            <span class="text-slate-300">Estable / Óptimo (≥75%)</span>
           </div>
         </div>
       </div>
 
-      <!-- HITOS DE PROSPECTIVA (CUATRIENIO / MEDIANO PLAZO / VISIÓN 20 AÑOS) -->
+      <!-- HITOS DEL CUATRIENIO (4 AÑOS) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
         <div class="rounded-2xl bg-white/5 border border-white/15 p-2.5 flex items-center justify-between">
           <div>
-            <span class="text-[10px] font-bold uppercase text-sky-300">Años 1 – 4 · Corto Plazo</span>
-            <p class="font-semibold text-white">Cuatrienio PND · PES y PEI Vigente</p>
+            <span class="text-[10px] font-bold uppercase text-sky-300">Año 1 · Arranque</span>
+            <p class="font-semibold text-white">Alistamiento PND · PES y PEI</p>
           </div>
           <span id="horizon-p1-score" class="text-sm font-extrabold px-2.5 py-1 rounded-xl bg-white/10">0%</span>
         </div>
         <div class="rounded-2xl bg-white/5 border border-white/15 p-2.5 flex items-center justify-between">
           <div>
-            <span class="text-[10px] font-bold uppercase text-amber-300">Años 5 – 12 · Mediano Plazo</span>
-            <p class="font-semibold text-white">Consolidación PEMT y Capacidades Conjuntas</p>
+            <span class="text-[10px] font-bold uppercase text-amber-300">Años 2 – 3 · Despliegue</span>
+            <p class="font-semibold text-white">Ejecución PEMT y Capacidades Conjuntas</p>
           </div>
           <span id="horizon-p2-score" class="text-sm font-extrabold px-2.5 py-1 rounded-xl bg-white/10">0%</span>
         </div>
         <div class="rounded-2xl bg-white/5 border border-white/15 p-2.5 flex items-center justify-between">
           <div>
-            <span class="text-[10px] font-bold uppercase text-emerald-300">Años 13 – 20 · Largo Plazo</span>
-            <p class="font-semibold text-white">Visión Prospectiva Fuerza Conjunta 2046</p>
+            <span class="text-[10px] font-bold uppercase text-emerald-300">Año 4 · Cierre Cuatrienio</span>
+            <p class="font-semibold text-white">Consolidación y Entrega de Capacidad</p>
           </div>
           <span id="horizon-p3-score" class="text-sm font-extrabold px-2.5 py-1 rounded-xl bg-white/10">0%</span>
         </div>
       </div>
 
-      <!-- LÍNEA DE TIEMPO INTERACTIVA DE 1 A 20 AÑOS -->
+      <!-- LÍNEA DE TIEMPO INTERACTIVA DE 1 A 4 AÑOS -->
       <div class="pt-1">
         <div class="flex items-center justify-between text-[11px] text-slate-300 mb-2">
-          <span>Proyección Anual Dinámica (Año 1 a Año 20) — Calculada según avance y rango (1–5 años) de cada plan</span>
-          <span id="timeline-peak-info" class="font-semibold text-sky-200">Año pico de capacidad: Año 5</span>
+          <span>Proyección Anual Dinámica (Año 1 a Año 4) — Calculada según avance y rango (1–5 años) de cada plan</span>
+          <span id="timeline-peak-info" class="font-semibold text-sky-200">Año pico de capacidad: Año 4</span>
         </div>
-        <div id="timeline-20-grid" class="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-20 gap-1.5" style="grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));">
-          <!-- 20 columnas dinámicas -->
+        <div id="timeline-4-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <!-- 4 columnas dinámicas -->
         </div>
       </div>
 
@@ -676,10 +764,7 @@
   <div id="core-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-md p-4">
     <div class="liquid-glass rounded-3xl p-6 max-w-lg w-full space-y-4 border border-white/30">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">💠</span>
-          <h3 class="text-base font-bold text-white">Diagnóstico del Núcleo Estratégico COGFM</h3>
-        </div>
+        <h3 class="text-base font-bold text-white">Diagnóstico del Núcleo Estratégico COGFM</h3>
         <button onclick="toggleCoreDiagnostics()" class="text-slate-300 hover:text-white text-lg font-bold">✕</button>
       </div>
       <div id="core-modal-content" class="space-y-3 text-xs text-slate-200 leading-relaxed">
@@ -693,174 +778,101 @@
 
   <script>
     // =========================================================================
-    // 1. MODELO DE DATOS ESTRATÉGICOS (COGFM - SECTOR DEFENSA)
+    // 1. MODELO DE DATOS COMPACTO (COGFM - SECTOR DEFENSA)
     // =========================================================================
-    const LEVER_TEMPLATES = {
-      presupuesto: [
-        { name: "Gestión de Vigencias Futuras", impact: 65, desc: "Asegura flujo plurianual ante Hacienda y DNP." },
-        { name: "Priorización de Rubros Críticos", impact: 72, desc: "Reorienta recursos hacia capacidades conjuntas." },
-        { name: "Optimización Ejecución PAC", impact: 60, desc: "Acelera compromisos y obligaciones trimestrales." }
-      ],
-      talento: [
-        { name: "Especialización Conjunta", impact: 75, desc: "Capacitación doctrinal en Comando General." },
-        { name: "Retención y Bienestar Fuerza", impact: 68, desc: "Fortalece sanidad, vivienda y moral combativa." },
-        { name: "Asignación de Cuadros Clave", impact: 70, desc: "Cubre vacantes críticas en estados mayores." }
-      ],
-      doctrina: [
-        { name: "Actualización Manuales Conjuntos", impact: 80, desc: "Alinea procedimientos Ejército, Armada y FAC." },
-        { name: "Armonización Normativa Sectorial", impact: 74, desc: "Sincroniza directivas con el PES Mindefensa." },
-        { name: "Lecciones Aprendidas Operacionales", impact: 78, desc: "Incorpora retroalimentación de teatros de operaciones." }
-      ],
-      infraestructura: [
-        { name: "Mantenimiento Mayor y Sostenimiento", impact: 62, desc: "Eleva tasa de disponibilidad de flota y equipos." },
-        { name: "Interoperabilidad C4ISR y Ciber", impact: 70, desc: "Integra comunicaciones seguras y mando y control." },
-        { name: "Modernización Base Logística", impact: 66, desc: "Reduce tiempos de abastecimiento estratégico." }
-      ],
-      contractual: [
-        { name: "Estructuración Pliegos Tipo Defensa", impact: 68, desc: "Disminuye tiempos precontractuales y declaratorias desiertas." },
-        { name: "Compras Centralizadas Conjuntas", impact: 76, desc: "Economías de escala entre las Fuerzas." },
-        { name: "Seguimiento y Supervisión Activa", impact: 71, desc: "Mitiga riesgos de incumplimiento de proveedores." }
-      ]
-    };
-
-    function createDefaultVariables(baseScore) {
-      const clamp = (v) => Math.max(15, Math.min(100, Math.round(v)));
-      return [
-        {
-          id: 'presupuesto',
-          name: 'Apropiación Presupuestal',
-          value: clamp(baseScore - 4),
-          levers: JSON.parse(JSON.stringify(LEVER_TEMPLATES.presupuesto))
-        },
-        {
-          id: 'talento',
-          name: 'Pie de Fuerza y Talento',
-          value: clamp(baseScore + 3),
-          levers: JSON.parse(JSON.stringify(LEVER_TEMPLATES.talento))
-        },
-        {
-          id: 'doctrina',
-          name: 'Doctrina y Normativa',
-          value: clamp(baseScore + 5),
-          levers: JSON.parse(JSON.stringify(LEVER_TEMPLATES.doctrina))
-        },
-        {
-          id: 'infraestructura',
-          name: 'Capacidades e Infraestructura',
-          value: clamp(baseScore - 6),
-          levers: JSON.parse(JSON.stringify(LEVER_TEMPLATES.infraestructura))
-        },
-        {
-          id: 'contractual',
-          name: 'Ejecución Contractual',
-          value: clamp(baseScore + 1),
-          levers: JSON.parse(JSON.stringify(LEVER_TEMPLATES.contractual))
-        }
-      ];
-    }
-
-    let plans = [
-      // 5 PLANES LÍNEA INSTITUCIONAL
+    const VARIABLE_DEFS = [
       {
-        id: 'inst-1',
-        line: 'institucional',
-        code: 'PEI-COGFM',
-        name: 'Plan Estratégico Institucional',
-        progress: 82,
-        horizon: 4,
-        variables: createDefaultVariables(82)
+        id: 'presupuesto', name: 'Apropiación Presupuestal', offset: -4,
+        levers: [
+          { name: 'Gestión de Vigencias Futuras', impact: 65, desc: 'Asegura flujo plurianual ante Hacienda y DNP.' },
+          { name: 'Priorización de Rubros Críticos', impact: 72, desc: 'Reorienta recursos hacia capacidades conjuntas.' },
+          { name: 'Optimización Ejecución PAC', impact: 60, desc: 'Acelera compromisos y obligaciones trimestrales.' }
+        ]
       },
       {
-        id: 'inst-2',
-        line: 'institucional',
-        code: 'PAA-PRES',
-        name: 'Plan Anual Adquisiciones y Vigencias',
-        progress: 68,
-        horizon: 2,
-        variables: createDefaultVariables(68)
+        id: 'talento', name: 'Pie de Fuerza y Talento', offset: 3,
+        levers: [
+          { name: 'Especialización Conjunta', impact: 75, desc: 'Capacitación doctrinal en Comando General.' },
+          { name: 'Retención y Bienestar Fuerza', impact: 68, desc: 'Fortalece sanidad, vivienda y moral combativa.' },
+          { name: 'Asignación de Cuadros Clave', impact: 70, desc: 'Cubre vacantes críticas en estados mayores.' }
+        ]
       },
       {
-        id: 'inst-3',
-        line: 'institucional',
-        code: 'PETI-CIBER',
-        name: 'Transformación Digital y Ciberdefensa',
-        progress: 74,
-        horizon: 4,
-        variables: createDefaultVariables(74)
+        id: 'doctrina', name: 'Doctrina y Normativa', offset: 5,
+        levers: [
+          { name: 'Actualización Manuales Conjuntos', impact: 80, desc: 'Alinea procedimientos Ejército, Armada y FAC.' },
+          { name: 'Armonización Normativa Sectorial', impact: 74, desc: 'Sincroniza directivas con el PES Mindefensa.' },
+          { name: 'Lecciones Aprendidas Operacionales', impact: 78, desc: 'Incorpora retroalimentación de teatros de operaciones.' }
+        ]
       },
       {
-        id: 'inst-4',
-        line: 'institucional',
-        code: 'PTH-BIEN',
-        name: 'Talento Humano y Bienestar Fuerza',
-        progress: 79,
-        horizon: 3,
-        variables: createDefaultVariables(79)
+        id: 'infraestructura', name: 'Capacidades e Infraestructura', offset: -6,
+        levers: [
+          { name: 'Mantenimiento Mayor y Sostenimiento', impact: 62, desc: 'Eleva tasa de disponibilidad de flota y equipos.' },
+          { name: 'Interoperabilidad C4ISR y Ciber', impact: 70, desc: 'Integra comunicaciones seguras y mando y control.' },
+          { name: 'Modernización Base Logística', impact: 66, desc: 'Reduce tiempos de abastecimiento estratégico.' }
+        ]
       },
       {
-        id: 'inst-5',
-        line: 'institucional',
-        code: 'MIPG-TRAN',
-        name: 'Gobernanza, Integridad y Doctrina',
-        progress: 85,
-        horizon: 5,
-        variables: createDefaultVariables(85)
-      },
-
-      // 5 PLANES LÍNEA MISIONAL
-      {
-        id: 'mis-1',
-        line: 'misional',
-        code: 'PES-MDN',
-        name: 'Plan Estratégico Sectorial',
-        progress: 80,
-        horizon: 4,
-        variables: createDefaultVariables(80)
-      },
-      {
-        id: 'mis-2',
-        line: 'misional',
-        code: 'PEMT-CAP',
-        name: 'Plan Estratégico de Mediano Tiempo',
-        progress: 72,
-        horizon: 5,
-        variables: createDefaultVariables(72)
-      },
-      {
-        id: 'mis-3',
-        line: 'misional',
-        code: 'POC-TERR',
-        name: 'Operaciones Conjuntas y Control',
-        progress: 84,
-        horizon: 3,
-        variables: createDefaultVariables(84)
-      },
-      {
-        id: 'mis-4',
-        line: 'misional',
-        code: 'PSLC-LOG',
-        name: 'Sostenimiento y Logística Conjunta',
-        progress: 61,
-        horizon: 4,
-        variables: createDefaultVariables(61)
-      },
-      {
-        id: 'mis-5',
-        line: 'misional',
-        code: 'PAIC-COOP',
-        name: 'Acción Integral y Cooperación',
-        progress: 76,
-        horizon: 3,
-        variables: createDefaultVariables(76)
+        id: 'contractual', name: 'Ejecución Contractual', offset: 1,
+        levers: [
+          { name: 'Estructuración Pliegos Tipo Defensa', impact: 68, desc: 'Disminuye tiempos precontractuales y declaratorias desiertas.' },
+          { name: 'Compras Centralizadas Conjuntas', impact: 76, desc: 'Economías de escala entre las Fuerzas.' },
+          { name: 'Seguimiento y Supervisión Activa', impact: 71, desc: 'Mitiga riesgos de incumplimiento de proveedores.' }
+        ]
       }
     ];
+
+    const createDefaultVariables = (base) => VARIABLE_DEFS.map(d => ({
+      id: d.id,
+      name: d.name,
+      value: Math.max(15, Math.min(100, Math.round(base + d.offset))),
+      levers: d.levers.map(l => ({ ...l }))
+    }));
+
+    const INITIAL_PLANS = [
+      ['inst-1', 'institucional', 'PEI-COGFM', 'Plan Estratégico Institucional', 82, 4],
+      ['inst-2', 'institucional', 'PAA-PRES', 'Plan Anual Adquisiciones y Vigencias', 68, 2],
+      ['inst-3', 'institucional', 'PETI-CIBER', 'Transformación Digital y Ciberdefensa', 74, 4],
+      ['inst-4', 'institucional', 'PTH-BIEN', 'Talento Humano y Bienestar Fuerza', 79, 3],
+      ['inst-5', 'institucional', 'MIPG-TRAN', 'Gobernanza, Integridad y Doctrina', 85, 5],
+      ['mis-1', 'misional', 'PES-MDN', 'Plan Estratégico Sectorial', 80, 4],
+      ['mis-2', 'misional', 'PEMT-CAP', 'Plan Estratégico de Mediano Tiempo', 72, 5],
+      ['mis-3', 'misional', 'POC-TERR', 'Operaciones Conjuntas y Control', 84, 3],
+      ['mis-4', 'misional', 'PSLC-LOG', 'Sostenimiento y Logística Conjunta', 61, 4],
+      ['mis-5', 'misional', 'PAIC-COOP', 'Acción Integral y Cooperación', 76, 3]
+    ];
+
+    let plans = INITIAL_PLANS.map(([id, line, code, name, progress, horizon]) => ({
+      id, line, code, name, progress, horizon,
+      variables: createDefaultVariables(progress)
+    }));
 
     let selectedPlanId = 'mis-2'; // Inicia seleccionado el PEMT por su relevancia
     let selectedVariableId = 'presupuesto';
 
     // =========================================================================
-    // 2. UTILIDADES DE SEMAFORIZACIÓN
+    // 2. UTILIDADES DE SEMAFORIZACIÓN Y PLASMA SVG REUTILIZABLE
     // =========================================================================
+    function renderPlasmaSvg(side, mainColor, secondaryColor) {
+      const flip = side === 'right' ? 'transform="scale(-1,1) translate(-120,0)"' : '';
+      return `
+        <svg class="w-full h-8 overflow-visible" viewBox="0 0 120 32" preserveAspectRatio="none">
+          <defs>
+            <filter id="plasmaGlow-${side}" x="-20%" y="-60%" width="140%" height="220%">
+              <feGaussianBlur stdDeviation="2.6" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+          </defs>
+          <g ${flip}>
+            <path d="M 0 16 Q 15 6, 30 16 T 60 16 T 90 16 T 120 16" fill="none" stroke="${mainColor}" stroke-width="5" stroke-opacity="0.28" filter="url(#plasmaGlow-${side})" />
+            <path class="plasma-bolt-main" d="M 0 16 L 18 9 L 34 22 L 52 8 L 70 23 L 88 10 L 104 20 L 120 16" fill="none" stroke="${mainColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" filter="url(#plasmaGlow-${side})" />
+            <path class="plasma-bolt-secondary" d="M 0 16 L 14 23 L 32 10 L 48 22 L 66 9 L 84 21 L 102 11 L 120 16" fill="none" stroke="${secondaryColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" />
+            <path class="plasma-bolt-core" d="M 0 16 L 18 11 L 34 20 L 52 10 L 70 21 L 88 12 L 104 18 L 120 16" fill="none" stroke="#ffffff" stroke-width="1.15" stroke-linecap="round" opacity="0.95" />
+          </g>
+        </svg>`;
+    }
+
     function getSemaphore(value) {
       if (value >= 75) {
         return {
@@ -938,48 +950,47 @@
         ? (plans.reduce((acc, p) => acc + p.horizon, 0) / plans.length).toFixed(1)
         : '0.0';
 
-      // Proyección de 1 a 20 años basada en los avances y horizontes (1 a 5 años) de cada plan
+      // Proyección de 1 a 4 años (Horizonte de Cuatrienio) basada en los avances y horizontes (1 a 5 años) de cada plan
       const timelineYears = [];
-      for (let year = 1; year <= 20; year++) {
+      for (let year = 1; year <= 4; year++) {
         let weightedSum = 0;
         let totalWeight = 0;
 
         plans.forEach(plan => {
-          const h = plan.horizon; // 1 a 5 años
+          const h = plan.horizon; // 1 a 5 años asignados al plan
           const prog = plan.progress;
 
-          // Curva de maduración e impacto:
-          // Durante sus años de ejecución (1..h) crece progresivamente; luego sostiene capacidad según su % alcanzado y horizonte estructural
+          // Curva de maduración dentro del cuatrienio (1 a 4 años):
+          // Si el plan tiene horizonte corto (1-2 años), madura rápido pero requiere sostenimiento en años 3-4.
+          // Si tiene horizonte de 4-5 años, escala progresivamente hasta alcanzar su plenitud al Año 4.
           let yearEffect = 0;
           if (year <= h) {
-            const ramp = 0.55 + 0.45 * (year / h);
+            const ramp = 0.52 + 0.48 * (year / Math.min(h, 4));
             yearEffect = prog * ramp;
           } else {
-            // Sostenimiento post-ejecución: horizontes largos (4-5 años) sostienen mejor hasta el año 20
             const yearsAfter = year - h;
-            const decayFactor = prog >= 75 ? 0.008 : (prog >= 50 ? 0.018 : 0.032);
-            const structuralBonus = (h - 1) * 2.2;
-            yearEffect = Math.max(12, Math.min(100, prog + structuralBonus - yearsAfter * decayFactor * 100));
+            const decayRate = prog >= 75 ? 0.02 : (prog >= 50 ? 0.05 : 0.09);
+            yearEffect = Math.max(15, prog * (1 - yearsAfter * decayRate));
           }
 
-          const planWeight = 0.8 + h * 0.25; // Planes de 4-5 años pesan más en la estructura a largo plazo
+          const planWeight = 0.85 + h * 0.2;
           weightedSum += yearEffect * planWeight;
           totalWeight += planWeight;
         });
 
-        // Efecto de sincronización institucional-misional sobre el largo plazo
-        const syncMultiplier = 0.88 + (syncScore / 100) * 0.16;
+        // Efecto de sincronización institucional-misional sobre el cumplimiento anual
+        const syncMultiplier = 0.86 + (syncScore / 100) * 0.18;
         const finalYearScore = Math.max(5, Math.min(100, Math.round((weightedSum / totalWeight) * syncMultiplier)));
         timelineYears.push({ year, score: finalYearScore });
       }
 
-      const p1Avg = Math.round(timelineYears.slice(0, 4).reduce((a, b) => a + b.score, 0) / 4);
-      const p2Avg = Math.round(timelineYears.slice(4, 12).reduce((a, b) => a + b.score, 0) / 8);
-      const p3Avg = Math.round(timelineYears.slice(12, 20).reduce((a, b) => a + b.score, 0) / 8);
+      const p1Avg = timelineYears[0].score;
+      const p2Avg = Math.round((timelineYears[1].score + timelineYears[2].score) / 2);
+      const p3Avg = timelineYears[3].score;
 
-      // Equilibrio: balance entre corto plazo (1-4 años), largo plazo (13-20 años) y sincronización
-      const temporalBalance = 100 - Math.abs(p1Avg - p3Avg) * 1.3;
-      const equilibriumScore = Math.max(0, Math.min(100, Math.round(temporalBalance * 0.45 + syncScore * 0.35 + p3Avg * 0.20)));
+      // Equilibrio: balance entre arranque (Año 1), cierre del cuatrienio (Año 4) y sincronización
+      const temporalBalance = 100 - Math.abs(p3Avg - p1Avg) * 1.1;
+      const equilibriumScore = Math.max(0, Math.min(100, Math.round(temporalBalance * 0.35 + syncScore * 0.35 + p3Avg * 0.30)));
 
       return {
         instAvg,
@@ -1044,15 +1055,20 @@
       syncLabel.textContent = syncSem.status;
       syncLabel.style.color = syncSem.color;
 
-      const lineGradient = `linear-gradient(90deg, ${instSem.color}, ${syncSem.color}, ${misSem.color})`;
-      document.getElementById('sync-line-left').style.backgroundImage = lineGradient;
-      document.getElementById('sync-line-right').style.backgroundImage = lineGradient;
+      // Actualizar colores y frecuencia de los rayos de plasma laterales
+      const plasmaLeft = document.getElementById('sync-plasma-left');
+      const plasmaRight = document.getElementById('sync-plasma-right');
+      const stateCls = m.syncScore < 50 ? 'plasma-critical' : (m.syncScore < 75 ? 'plasma-moderate' : '');
+      plasmaLeft.className = `flex-1 h-8 flex items-center overflow-visible ${stateCls}`;
+      plasmaRight.className = `flex-1 h-8 flex items-center overflow-visible ${stateCls}`;
+      plasmaLeft.innerHTML = renderPlasmaSvg('left', syncSem.color, instSem.color);
+      plasmaRight.innerHTML = renderPlasmaSvg('right', syncSem.color, misSem.color);
 
       let gapText = `Brecha Institucional vs. Misional: ${m.gap}%`;
       if (m.gap > 15) {
         gapText += m.misAvg > m.instAvg
-          ? ' ⚠️ Esfuerzo operacional sin suficiente respaldo institucional'
-          : ' ⚠️ Capacidad administrativa subutilizada frente a lo misional';
+          ? ' · Alerta: esfuerzo operacional sin suficiente respaldo institucional'
+          : ' · Alerta: capacidad administrativa subutilizada frente a lo misional';
       } else {
         gapText += ' · Alineación armónica entre soporte y operaciones';
       }
@@ -1106,20 +1122,20 @@
                 </div>
               </div>
 
-              <!-- Controles rápidos +/- porcentaje y horizonte -->
-              <div class="flex items-center justify-between gap-1 pt-0.5" onclick="event.stopPropagation()">
-                <div class="flex items-center gap-1">
+              <!-- Controles rápidos +/- porcentaje y horizonte (ergonomía táctil para sala y tablet) -->
+              <div class="flex items-center justify-between gap-1.5 pt-1" onclick="event.stopPropagation()">
+                <div class="flex items-center gap-1.5">
                   <button onclick="adjustPlanProgress('${plan.id}', -5)"
-                          class="w-7 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center border border-white/15"
+                          class="w-9 h-8 rounded-xl bg-white/12 hover:bg-white/25 active:scale-95 text-white font-extrabold text-sm flex items-center justify-center border border-white/20"
                           title="Reducir avance (-5%)">−</button>
                   <button onclick="adjustPlanProgress('${plan.id}', 5)"
-                          class="w-7 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center border border-white/15"
+                          class="w-9 h-8 rounded-xl bg-white/12 hover:bg-white/25 active:scale-95 text-white font-extrabold text-sm flex items-center justify-center border border-white/20"
                           title="Aumentar avance (+5%)">+</button>
                 </div>
                 <button onclick="cyclePlanHorizon('${plan.id}')"
-                        class="px-2 h-6 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-semibold text-sky-200 border border-white/15"
+                        class="px-2.5 h-8 rounded-xl bg-white/12 hover:bg-white/25 active:scale-95 text-[11px] font-bold text-sky-200 border border-white/20"
                         title="Cambiar horizonte (1 a 5 años)">
-                  ⏱ 1–5a
+                  1–5a
                 </button>
               </div>
             </div>
@@ -1131,25 +1147,46 @@
     function renderCentralCore(m) {
       const coreSem = getSemaphore(m.coreScore);
       const orb = document.getElementById('liquid-core-orb');
+      const outerRing = document.getElementById('core-outer-ring');
+      const innerRing = document.getElementById('core-inner-ring');
+
       orb.style.background = coreSem.gradient;
       orb.style.setProperty('--core-glow', coreSem.glow);
 
-      // Velocidad de animación según estabilidad
-      const animSpeed = m.coreScore >= 75 ? '8s' : (m.coreScore >= 50 ? '5s' : '2.8s');
-      orb.style.animationDuration = `${animSpeed}, 3.5s`;
+      // Aplicar clase de estabilidad visual según semáforo:
+      // Verde (>=75): Estable | Amarillo (50-74): Moderadamente inestable | Rojo (<50): Muy inestable
+      orb.classList.remove('core-stable', 'core-moderate', 'core-critical');
+      outerRing.classList.remove('ring-moderate', 'ring-critical');
+      innerRing.classList.remove('ring-moderate', 'ring-critical');
+
+      let stabilityLabel = 'ESTABLE';
+      if (m.coreScore >= 75) {
+        orb.classList.add('core-stable');
+        stabilityLabel = 'ESTABLE';
+      } else if (m.coreScore >= 50) {
+        orb.classList.add('core-moderate');
+        outerRing.classList.add('ring-moderate');
+        innerRing.classList.add('ring-moderate');
+        stabilityLabel = 'INESTABLE LEVE';
+      } else {
+        orb.classList.add('core-critical');
+        outerRing.classList.add('ring-critical');
+        innerRing.classList.add('ring-critical');
+        stabilityLabel = 'MUY INESTABLE';
+      }
 
       document.getElementById('core-score-text').textContent = `${m.coreScore}%`;
-      document.getElementById('core-state-badge').textContent = coreSem.status.toUpperCase();
+      document.getElementById('core-state-badge').textContent = stabilityLabel;
       document.getElementById('core-avg-horizon').textContent = `${m.avgHorizon} años`;
       document.getElementById('core-green-count').textContent = `${m.greenCount}/${plans.length}`;
 
       let narrative = '';
       if (m.coreScore >= 75) {
-        narrative = 'Fuerza Conjunta altamente cohesionada. Los planes institucionales sostienen el despliegue misional y proyectan capacidades sólidas.';
+        narrative = 'Núcleo estable: Fuerza Conjunta cohesionada. Los planes institucionales sostienen el despliegue misional durante el cuatrienio.';
       } else if (m.coreScore >= 50) {
-        narrative = 'Capacidad conjunta en consolidación. Se observan brechas parciales en ejecución presupuestal o sostenimiento logístico.';
+        narrative = 'Inestabilidad moderada: se observan oscilaciones por brechas parciales en ejecución presupuestal o sostenimiento logístico.';
       } else {
-        narrative = 'Alerta estratégica: rezago crítico en planes estructurales compromete la disponibilidad operacional y la proyección a mediano plazo.';
+        narrative = 'Alta inestabilidad crítica: rezago severo en planes estructurales compromete la disponibilidad operacional en el corto y mediano plazo.';
       }
       document.getElementById('core-narrative').textContent = narrative;
 
@@ -1206,15 +1243,15 @@
       document.getElementById('selected-plan-horizon-label').textContent = `${plan.horizon} ${plan.horizon === 1 ? 'año' : 'años'}`;
       document.getElementById('selected-plan-line').textContent = plan.line;
 
-      // Botones 1 a 5 años
+      // Botones 1 a 5 años (tamaño táctil ampliado para tablet/sala)
       const horizonBtns = document.getElementById('horizon-selector-buttons');
       horizonBtns.innerHTML = [1, 2, 3, 4, 5].map(yr => {
         const active = plan.horizon === yr;
         return `
           <button onclick="setSelectedPlanHorizon(${yr})"
-                  class="py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                  class="py-2 min-h-[36px] rounded-xl text-xs font-extrabold border transition-all active:scale-95 ${
                     active
-                      ? 'bg-sky-500/50 border-sky-300 text-white shadow-md'
+                      ? 'bg-sky-500/55 border-sky-300 text-white shadow-md'
                       : 'bg-white/5 border-white/15 text-slate-300 hover:bg-white/15'
                   }">
             ${yr}a
@@ -1304,9 +1341,7 @@
     function renderBottomEquilibriumAndTimeline(m) {
       const eqSem = getSemaphore(m.equilibriumScore);
 
-      const eqIcon = document.getElementById('eq-icon-box');
-      eqIcon.style.backgroundColor = eqSem.bgSoft;
-      eqIcon.style.borderColor = eqSem.border;
+      document.getElementById('eq-indicator-dot').style.backgroundColor = eqSem.color;
 
       const eqBadge = document.getElementById('eq-status-badge');
       eqBadge.textContent = `${m.equilibriumScore}% · ${eqSem.status}`;
@@ -1316,11 +1351,11 @@
 
       const eqDesc = document.getElementById('eq-description');
       if (m.equilibriumScore >= 75) {
-        eqDesc.textContent = 'Sistema equilibrado: las inversiones de 1–5 años garantizan sostenibilidad operativa hasta el horizonte de 20 años.';
+        eqDesc.textContent = 'Sistema equilibrado: los planes de 1–5 años garantizan cumplimiento sostenido en los 4 años del cuatrienio.';
       } else if (m.equilibriumScore >= 50) {
-        eqDesc.textContent = 'Equilibrio parcial: se requiere ampliar horizontes a 4–5 años o elevar el cumplimiento para evitar caída de capacidades tras el año 8.';
+        eqDesc.textContent = 'Equilibrio parcial: ajuste horizontes o eleve variables críticas para evitar pérdida de ritmo entre el Año 2 y el Año 4.';
       } else {
-        eqDesc.textContent = 'Desequilibrio estructural: alta vulnerabilidad a mediano y largo plazo por rezago en planes estructurales.';
+        eqDesc.textContent = 'Desequilibrio crítico: alta vulnerabilidad en el cuatrienio por rezago acumulado entre soporte institucional y despliegue misional.';
       }
 
       // Hitos P1, P2, P3
@@ -1339,22 +1374,34 @@
       const peak = m.timelineYears.reduce((best, cur) => cur.score > best.score ? cur : best, m.timelineYears[0]);
       document.getElementById('timeline-peak-info').textContent = `Año pico de capacidad: Año ${peak.year} (${peak.score}%)`;
 
-      // Renderizar las 20 columnas de la línea de tiempo (1 a 20 años)
-      const grid = document.getElementById('timeline-20-grid');
+      // Renderizar las 4 columnas de la línea de tiempo (1 a 4 años)
+      const phaseNames = {
+        1: 'Año 1 · Alistamiento',
+        2: 'Año 2 · Expansión',
+        3: 'Año 3 · Consolidación',
+        4: 'Año 4 · Cierre Meta'
+      };
+
+      const grid = document.getElementById('timeline-4-grid');
       grid.innerHTML = m.timelineYears.map(item => {
         const ySem = getSemaphore(item.score);
-        const phaseTag = item.year <= 4 ? 'PND' : (item.year <= 12 ? 'PEMT' : '2046');
+        const phaseTag = phaseNames[item.year] || `Año ${item.year}`;
         return `
-          <div class="rounded-2xl p-2 border flex flex-col items-center justify-between gap-1.5 transition-all duration-300 hover:scale-105"
-               style="background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, ${ySem.bgSoft} 100%); border-color: ${ySem.border};"
-               title="Año ${item.year} (${phaseTag}): Capacidad proyectada ${item.score}% - ${ySem.status}">
-            <span class="text-[9px] font-bold uppercase tracking-wider text-slate-300">${phaseTag}</span>
-            <div class="w-full h-16 bg-black/35 rounded-xl flex items-end p-1 overflow-hidden">
-              <div class="w-full rounded-lg transition-all duration-500"
-                   style="height: ${item.score}%; background: ${ySem.color}; box-shadow: 0 0 10px ${ySem.color};"></div>
+          <div class="rounded-2xl p-3 border flex flex-col justify-between gap-2 transition-all duration-300 hover:scale-[1.02]"
+               style="background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, ${ySem.bgSoft} 100%); border-color: ${ySem.border};"
+               title="${phaseTag}: Capacidad proyectada ${item.score}% - ${ySem.status}">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-200">${phaseTag}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/30" style="color:${ySem.color}">${ySem.status}</span>
             </div>
-            <span class="text-[11px] font-extrabold text-white">${item.score}%</span>
-            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-black/30 text-slate-200">A${item.year}</span>
+            <div class="w-full h-20 bg-black/35 rounded-xl flex items-end p-1.5 overflow-hidden">
+              <div class="w-full rounded-lg transition-all duration-500"
+                   style="height: ${item.score}%; background: ${ySem.color}; box-shadow: 0 0 12px ${ySem.color};"></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-lg bg-black/30 text-slate-200">Año ${item.year}</span>
+              <span class="text-base font-black text-white">${item.score}%</span>
+            </div>
           </div>
         `;
       }).join('');
@@ -1557,16 +1604,16 @@
               <div class="text-lg font-extrabold text-sky-300">${m.syncScore}%</div>
             </div>
             <div>
-              <div class="text-[10px] text-slate-300 uppercase">Equilibrio 20a</div>
+              <div class="text-[10px] text-slate-300 uppercase">Equilibrio 4a</div>
               <div class="text-lg font-extrabold text-emerald-300">${m.equilibriumScore}%</div>
             </div>
           </div>
           <div>
-            <h4 class="font-bold text-white mb-1">Focos de Atención Prioritaria (COGFM):</h4>
+            <h4 class="font-bold text-white mb-1">Focos de Atención Prioritaria (COGFM · CGDJ5):</h4>
             <ul class="space-y-1 text-slate-300">${listHtml}</ul>
           </div>
           <p class="text-[11px] text-slate-400">
-            Consejo estratégico: Para sostener capacidades conjuntas más allá del año 10 en la línea de tiempo, asegure que el <strong>PEI</strong> y el <strong>PEMT</strong> operen con horizontes de 4 a 5 años y avance superior al 75%.
+            Consejo estratégico: Para estabilizar el núcleo central en verde y sostener capacidades en los 4 años del cuatrienio, asegure que el <strong>PEI</strong> y el <strong>PEMT</strong> superen el 75% de ejecución.
           </p>
         `;
         modal.classList.remove('hidden');
@@ -1584,4 +1631,3 @@
   </script>
 </body>
 </html>
-```
